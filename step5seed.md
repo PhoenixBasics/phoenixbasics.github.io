@@ -57,10 +57,13 @@ Now let's update our layout
 curl -o assets/css/zapp.css https://raw.githubusercontent.com/nhu313/fawkes_nhu/master/assets/css/zapp.css && curl -o lib/fawkes_web/templates/slot/index.html.eex https://raw.githubusercontent.com/nhu313/fawkes_nhu/master/lib/fawkes_web/templates/slot/index.html.eex && curl -o lib/fawkes_web/templates/speaker/index.html.eex https://raw.githubusercontent.com/nhu313/fawkes_nhu/master/lib/fawkes_web/templates/speaker/index.html.eex && curl -o lib/fawkes_web/templates/speaker/show.html.eex https://raw.githubusercontent.com/nhu313/fawkes_nhu/master/lib/fawkes_web/templates/speaker/show.html.eex && curl -o lib/fawkes_web/views/shared_view.ex https://raw.githubusercontent.com/nhu313/fawkes_nhu/master/lib/fawkes_web/views/shared_view.ex
 ```
 
-
-
 ### Lab Add path for talk
 
+1. Add a route
+2. Add a controler to handle the route
+3. In Schedule, retrieve the talk
+4. Add a view for the talk
+5. Add a template for the view
 
 ```
 <div class="container talk">
