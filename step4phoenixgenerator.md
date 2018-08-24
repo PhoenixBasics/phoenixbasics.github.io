@@ -26,24 +26,24 @@ Alright, let's check to see if it works http://localhost:4000/audiences.
 
 <img src="https://media.giphy.com/media/3o6MbeDiaHJaF2EuQM/giphy.gif">
 
-Let's generate a few more models for our application.
+Woo, that was hard work.
 
-First we need the slot
+Let's generate a few more models for our application.
 
 ```
 mix phx.gen.html Schedule Slot schedule_slots slug:string:unique start_time:utc_datetime end_time:utc_datetime
 ```
 
 ```
-mix phx.gen.html Schedule Location locations slug:string:unique name:string
+mix phx.gen.model Schedule Location locations slug:string:unique name:string
 ```
 
 ```
-mix phx.gen.html Schedule Event events slug:string:unique name:string slot_id:references:schedule_slots
+mix phx.gen.model Schedule Event events slug:string:unique name:string slot_id:references:schedule_slots
 ```
 
 ```
-mix phx.gen.html Schedule Talk talks slug:string:unique title:string slot_id:references:schedule_slots audience_id:references:audiences location_id:references:locations description:text
+mix phx.gen.model Schedule Talk talks slug:string:unique title:string slot_id:references:schedule_slots audience_id:references:audiences location_id:references:locations description:text
 ```
 
 ```
@@ -62,7 +62,7 @@ For `Audience` module `lib/fawkes/schedule/audience.ex`,
 has_many :talks, Fawkes.Schedule.Talk
 ```
 
-Open `speaker.ex`, delete line 15 and replace it with the belongs_to relationship:
+A speaker belongs to a talk, so open `speaker.ex`, delete line 15 and replace it with the belongs_to relationship:
 
 ```
 belongs_to :talk, Fawkes.Schedule.Talk
@@ -82,33 +82,11 @@ In addition to the validation, in the changeset you can set the constraint that 
 
 ```
 |> assoc_constraint(:audience)
+|> assoc_constraint(:slot)
+|> assoc_constraint(:location)
 ```
 
-
-
-Notice at the end of the command, it told us to add the new route `resources "/speakers", SpeakerController` to our router. This will handle all of our CRUD operations. Let's open our router `lib/fawkes_web/router.ex` and add:
-
-```
-resources "/speakers", SpeakerController
-```
-
-Let's run the migration to create our speaker table
-
-```
-mix ecto.migrate
-```
-
-Alright, now let's restart our server and check http://localhost:4000/speakers.
-
-Woo, that was hard work.
-
-Let's add a few more.
-
-
-
-
-
-Now we generated all our modules, let's add them to the router `lib/fawkes_web/router.ex` (if you haven't already). This should go right below `resources "/speakers", SpeakerController`
+Now we generated all our modules, let's add them to the router `lib/fawkes_web/router.ex` (if you haven't already). This should go right below `resources "/audiences", AudienceController`
 
 ```
 resources "/schedule_slots", SlotController
@@ -123,35 +101,3 @@ Now let's run our migration to add all the tables:
 ```
 mix ecto.migrate
 ```
-
-
-mix phx.gen.html MyContext MyModel my_models a b c d:integer --no-context
-
---no-model
-https://hexdocs.pm/phoenix/Mix.Tasks.Phoenix.Gen.Html.html
-mix phoenix.gen.model Post posts title user_id:references:users
-
-
-mix phoenix.gen.model TalkCategory talks_categories talk_id:references:talks category_id:references:categories --no-model
-
-mix ecto.gen.migration add_talk_category
-
-
-defmodule Fawkes.Repo.Migrations.CreateTalkCategory do
-  use Ecto.Migration
-
-  def change do
-    create table(:talks_categories) do
-      add :talk_id, references(:talks, on_delete: :nothing)
-      add :category_id, references(:categories, on_delete: :nothing)
-
-      timestamps()
-    end
-
-    create index(:talks_categories, [:talk_id])
-    create index(:talks_categories, [:category_id])
-  end
-end
-
-
-https://medium.com/@abitdodgy/building-many-to-many-associations-with-embedded-schemas-in-ecto-and-phoenix-e420abc4c6ea
