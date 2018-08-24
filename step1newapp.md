@@ -77,3 +77,7 @@ After the application installed your dependencies, it tells you what to do next.
 ### Prettifying the page
 
 TODO: Add content to download image, css, and app.html
+
+```
+curl -o lib/fawkes_web/templates/layout/app.html.eex https://raw.githubusercontent.com/nhu313/fawkes_nhu/master/lib/fawkes_web/templates/layout/app.html.eex && curl -o assets/static/images/elixirconf.png  https://raw.githubusercontent.com/nhu313/fawkes_nhu/master/assets/static/images/elixirconf.png && curl -o assets/static/images/hyatt.png  https://raw.githubusercontent.com/nhu313/fawkes_nhu/master/assets/static/images/hyatt.png
+```

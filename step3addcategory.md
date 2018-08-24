@@ -30,6 +30,12 @@ Let's add an index for the category name.
 create index("categories", :name, unique: true)
 ```
 
+By default, Ecto will make every field required. But we don't want the icon_url to be required because not all of them have an image associated with it. Let's open up `lib/fawkes/schedule/category.ex` and remove `icon_url` from the changeset validate_required function (line 18). So it would only require name and slug.
+
+```
+    |> validate_required([:slug, :name])
+```
+
 Now run this command to create the table in the database:
 
 ```
