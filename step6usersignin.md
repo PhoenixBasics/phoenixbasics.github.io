@@ -3,6 +3,12 @@ layout: page
 title: Add Member Signin
 ---
 
+### Let's get on the same page...
+
+To make sure everyone is at the same point - please stop your Phoenix server and clone `git@github.com:PhoenixBasics/Fawkes.git`.
+
+This will give us a basic app with a completed schedule to work with.
+
 ### Add a Signup Context
 
 Now that we have a schedule let's add the ability for members to join the site - this will allow us to let people curate their own agenda at the conference.
