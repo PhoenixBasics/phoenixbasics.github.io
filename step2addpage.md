@@ -5,7 +5,7 @@ title: Add a page
 
 
 ## Add a page
-When a request is sent, Phoenix will look at the router file to figure out which controller handles the request. You can add a new endpoint by adding `[HTTP verb] [path], [controller], [function]`. Let's add an about page to our app. First we need to add a get path to our app.
+When a request is sent, Phoenix will look at the router file to figure out which controller handles the request. You can see all the routes by running `mix phx.routes` in the command line. To add a new endpoint, use this pattern: `[HTTP verb] [path], [controller], [function]`. Let's add an about page to our app. First we need to add a get path to our app.
   1. Open `lib/fawkes_web/router.ex`
   2. Under `pipe_through :browser`, on line 18, add the line below. This means when a GET request for `/about`, the `about` function in the `PageController` will handle the request.
 

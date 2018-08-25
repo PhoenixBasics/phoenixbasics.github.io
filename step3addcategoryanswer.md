@@ -1,0 +1,73 @@
+---
+layout: page
+title: Add a feature - Answer
+---
+
+## Show Category
+
+In `schedule.ex`, add
+
+```
+def get_category!(id) do
+  Repo.get!(Category, id)
+end
+```
+
+In `category_controller.ex`, add
+
+```
+def show(conn, %{"id" => id}) do
+  category = Schedule.get_category!(id)
+  render(conn, "show.html", category: category)
+end
+```
+
+Create a new file `template/category/show.html.eex` and add this code:
+
+```
+<h1>Category</h1>
+<p>Name: <%= @category.name %></p>
+<p>Slug: <%= @category.slug %></p>
+<p>Icon URL: <%= @category.icon_url %></p>
+```
+
+In the `router.ex` file, add this path below new category:
+
+```
+get "/categories/:id", CategoryController, :show
+```
+
+## Delete Category
+
+In the `template/category/index.html.eex`, add this next to show:
+
+```
+<span><%= link "Delete", to: category_path(@conn, :delete, category), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-xs" %></span>
+```
+
+In the `router.ex`, add this code below show category
+
+```
+delete "/category/:id", CategoryController, :delete
+```
+
+In the `category_controller`, add this:
+
+```
+def delete(conn, %{"id" => id}) do
+    category = Schedule.get_category!(id)
+    {:ok, _category} = Schedule.delete_category(category)
+
+    conn
+    |> put_flash(:info, "Category deleted.")
+    |> redirect(to: category_path(conn, :index))
+end
+```
+
+In the schedule, add this to delete category:
+
+```
+def delete_category(category) do
+  Repo.delete(category)
+end
+```

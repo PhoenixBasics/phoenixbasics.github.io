@@ -26,8 +26,6 @@ mix ecto.migrate
 
 Alright, let's check to see if it works http://localhost:4000/audiences.
 
-<img src="https://media.giphy.com/media/3o6MbeDiaHJaF2EuQM/giphy.gif">
-
 Woo, that was hard work.
 
 Let's generate a few more models for our application.

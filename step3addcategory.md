@@ -20,9 +20,13 @@ DON'T run the migration yet.
 
 Running this command will create two files, a migration file (`priv/repo/migrations/20180803152910_create_categories.exs`) and a model file (`lib/fawkes/schedule/category.ex`). The migration file uses the timestamp to know which file to migrate first. https://hexdocs.pm/ecto/Ecto.Schema.html
 
-Our project uses Ecto to talk to the database.
+Our project uses Ecto to talk to the database. [Ecto](https://hexdocs.pm/ecto/Ecto.html) is a library that handles form of data validation and persistence. It consist of 4 parts:
+- Ecto.Repo - repositories are wrappers around the data store. Via the repository, we can create, update, destroy and query existing entries. A repository needs an adapter and credentials to communicate to the database
+- Ecto.Schema - schemas are used to map any data source into an Elixir struct
+- Ecto.Changeset - changesets provide a way for developers to filter and cast external parameters, as well as a mechanism to track and validate changes before they are applied to your data
+- Ecto.Query - written in Elixir syntax, queries are used to retrieve information from a given repository. Queries in Ecto are secure, avoiding common problems like SQL Injection, while still being composable, allowing developers to build queries piece by piece instead of all at once
 
-#TODO add more info on ecto
+You will learn more about as we continue to build this application.
 
 Let's add an index for the category name.
 
@@ -106,6 +110,7 @@ Create a new folder called `category` in `lib/fawkes_web/templates`. Add a new f
       <tr>
         <td><%= category.name %></td>
         <td><%= category.slug %></td>
+        <td><a href="/categories/<%= category.id %>">Show</a></td>
       </tr>
   <% end %>
   </tbody>
@@ -118,11 +123,11 @@ Open `lib/fawkes_web/router.ex`. On line 21, after the `get "/", PageController,
  get "/categories", CategoryController, :index
 ```
 
-Now go to http://localhost:4000/categories
+Now go to [http://localhost:4000/categories](http://localhost:4000/categories)
 
-Woo! We have a page for the category. Since we don't have any category, our page is empty. Let's add a page to create a category.
+Woohoo! We have a page for the category. Since we don't have any category, our page is empty. Let's add a page to create a category.
 
-### Adding a category form
+### Add a category form
 
 First let's create a form to add a category. Create a new file called `lib/fawkes_web/templates/category/new.html.eex`. Add the following code to the file:
 
@@ -175,7 +180,7 @@ def category_changeset(changeset \\ %Category{}) do
 end
 ```
 
-Ok, now go to http://localhost:4000/categories/new. Congratulations, we have a form to add a category.
+Ok, now go to http://localhost:4000/categories/new. Notice it gives you an error because we didn't define the path to post the data.
 
 ### Create a category
 
@@ -217,17 +222,15 @@ Go to http://localhost:4000/categories/new, add a new category and hit submit. C
 Exercise #1: Implement the show category
 
 When a user sends GET request to `http://localhost:4000/categories/1`, the application will displays the category's name, slug, icon_url.
+Hint: To get a category from a repo: `Repo.get!(Category, id)`
 
-Resources:
-- https://hexdocs.pm/ecto/Ecto.Repo.html
-- https://hexdocs.pm/phoenix/Phoenix.Controller.html
-
+### Resources:
+- [https://hexdocs.pm/ecto/Ecto.Repo.html](https://hexdocs.pm/ecto/Ecto.Repo.html)
+- [https://hexdocs.pm/phoenix/Phoenix.Controller.html](https://hexdocs.pm/phoenix/Phoenix.Controller.html)
 
 ### Delete
 Optional Exercise: Implement the delete feature.
 
 When a user sends DELETE request to `http://localhost:4000/categories/1`, the application will delete the category with ID 1 and redirect the user to `/categories`.
 
-Resources:
-- https://hexdocs.pm/ecto/Ecto.Repo.html
-- https://hexdocs.pm/phoenix/Phoenix.Controller.html
+Hint: To delete a category from a repo `Repo.delete(category)`. To redirect to category index `redirect(conn, to: category_path(conn, :index))`
