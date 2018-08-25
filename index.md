@@ -20,7 +20,7 @@ Hello! Welcome to Phoenix Basics! In this jam packed day, we'll build an applica
 ### Lost?
 At any point that you're lost, check out the final code here:
 
-[https://github.com/PhoenixBasics/Fawkes](https://github.com/PhoenixBasics/Fawkes)
+[https://github.com/nhu313/Fawkes](https://github.com/nhu313/Fawkes)
 
 We broke each section into branches so you can see the difference.
 
