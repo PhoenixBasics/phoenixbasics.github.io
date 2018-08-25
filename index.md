@@ -26,3 +26,4 @@ We broke each section into branches so you can see the difference.
 
 ### Resources:
 - https://hexdocs.pm/phoenix/installation.html
+- https://hexdocs.pm/phoenix/heroku.html
