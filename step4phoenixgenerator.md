@@ -174,6 +174,12 @@ has_many :talks, Fawkes.Schedule.Talk
 has_one :event, Fawkes.Schedule.Event
 ```
 
+Open `lib/fawkes/schedule/event.ex`, add `slot_id` to the cast call.
+
+```
+|> cast(attrs, [:slug, :name, :slot_id])
+```
+
 ### Add Timex dependency
 
 Open `mix.exs`, after line 33 in the `deps` block, add a comma, then timex_ecto
