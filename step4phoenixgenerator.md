@@ -4,7 +4,7 @@ title: Phoenix Generator
 ---
 
 
-Because adding CRUD application is so common and tedious, Phoenix comes with a command to generate all that code for us, and more. Let's generate a model to represent the level of the talk (e.g. beginner).
+Because adding CRUD application is so common, Phoenix comes with a task to generate all that code for us. Let's generate a model to represent the level of the talk (e.g. beginner, advance).
 
 ```
 mix phx.gen.html Schedule Audience audiences slug:string:unique name:string
@@ -16,7 +16,11 @@ Notice at the end of the command, it told us to add the new route `resources "/a
 resources "/audiences", AudienceController
 ```
 
-#TODO add code to see all the routes
+To check to see what routes were added, let's run
+
+```
+mix phx.routes
+```
 
 Now let's run our migration to create the table:
 
@@ -24,9 +28,9 @@ Now let's run our migration to create the table:
 mix ecto.migrate
 ```
 
-Alright, let's check to see if it works http://localhost:4000/audiences.
+Alright, let's check to see if it works [http://localhost:4000/audiences](http://localhost:4000/audiences).
 
-Woo, that was hard work.
+Well, that was a lot of work.
 
 Let's generate a few more models for our application.
 
@@ -53,7 +57,7 @@ mix phx.gen.schema Schedule.Talk talks slug:string:unique title:string slot_id:r
 ```
 
 ```
-mix phx.gen.html Schedule Speaker speakers talk_id:references:talks slug:string:unique image_url:string first_name:string last_name:string company:string github:string twitter:string description:text
+mix phx.gen.html Schedule Speaker speakers talk_id:references:talks slug:string:unique image_url:string first:string last:string company:string github:string twitter:string description:text
 ```
 
 Let's add the routes for the speakers:
@@ -62,23 +66,28 @@ Let's add the routes for the speakers:
 resources "/speakers", SpeakerController
 ```
 
-Open up `lib/fawkes/schedule/speaker.ex`, on line 25, remove company, github, twitter, and description from the required fields.
+Open up `lib/fawkes/schedule/speaker.ex`, (maybe line 24), remove company, github, twitter, and description from the required fields.
 
 ```
-|> validate_required([:slug, :image_url, :first_name, :last_name])
+|> validate_required([:slug, :image_url, :first, :last])
 ```
 
+Add `talk_id` to the cast
+
+```
+|> cast(attrs, [:slug, :image_url, :first, :last, :company, :github, :twitter, :description, :talk_id])
+```
 
 We need one more migration to link the category to the talks:
 
 ```
-mix ecto.gen.migration add_talks_categories
+mix ecto.gen.migration create_talks_categories
 ```
 
-Open up the migration file `priv/repo/migrations/___add_talks_categories.exs`, add the code for the migration
+Open up the migration file `priv/repo/migrations/[date]_create_talks_categories.exs`, add the code for the migration
 
 ```
-defmodule Fawkes.Repo.Migrations.AddTalksCategories do
+defmodule Fawkes.Repo.Migrations.CreateTalksCategories do
   use Ecto.Migration
 
   def change do
@@ -130,12 +139,32 @@ belongs_to :slot, Fawkes.Schedule.Slot
 has_many :speakers, Fawkes.Schedule.Speaker
 ```
 
+For the `cast`, add in `:audience_id, :location_id, :slot_id` like this:
+
+```
+|> cast(attrs, [:slug, :title, :description, :audience_id, :location_id, :slot_id])
+```
+
 In addition to the validation, in the changeset you can set the constraint that the child can't be created if the parent doesn't exist.
 
 ```
 |> assoc_constraint(:audience)
 |> assoc_constraint(:slot)
 |> assoc_constraint(:location)
+```
+
+Your talk changeset should look like this:
+
+```
+def changeset(talk, attrs) do
+  talk
+  |> cast(attrs, [:slug, :title, :description, :audience_id, :location_id, :slot_id])
+  |> validate_required([:slug, :title, :description])
+  |> unique_constraint(:slug)
+  |> assoc_constraint(:audience)
+  |> assoc_constraint(:slot)
+  |> assoc_constraint(:location)
+end
 ```
 
 Open `lib/fawkes/schedule/slot.ex`, let's add the talk and event relationship.

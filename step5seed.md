@@ -21,7 +21,7 @@ curl -o lib/fawkes/schedule/seed/audience.ex https://raw.githubusercontent.com/n
 Add this line to `priv/repo/seeds.exs` run the seed file:
 
 ```
-Fawkes.Schedule.seed()
+Fawkes.Schedule.Seed.perform()
 ```
 
 Let's seed our database:
@@ -48,34 +48,38 @@ Slot
 |> Enum.group_by(&(Timex.beginning_of_day(&1.start_time)))
 ```
 
-
-
-
 Now let's update our layout
 
 ```
-curl -o assets/css/zapp.css https://raw.githubusercontent.com/nhu313/fawkes_nhu/master/assets/css/zapp.css && curl -o lib/fawkes_web/templates/slot/index.html.eex https://raw.githubusercontent.com/nhu313/fawkes_nhu/master/lib/fawkes_web/templates/slot/index.html.eex && curl -o lib/fawkes_web/templates/speaker/index.html.eex https://raw.githubusercontent.com/nhu313/fawkes_nhu/master/lib/fawkes_web/templates/speaker/index.html.eex && curl -o lib/fawkes_web/templates/speaker/show.html.eex https://raw.githubusercontent.com/nhu313/fawkes_nhu/master/lib/fawkes_web/templates/speaker/show.html.eex && curl -o lib/fawkes_web/views/shared_view.ex https://raw.githubusercontent.com/nhu313/fawkes_nhu/master/lib/fawkes_web/views/shared_view.ex
+curl -o lib/fawkes_web/templates/slot/index.html.eex https://raw.githubusercontent.com/nhu313/fawkes_nhu/master/lib/fawkes_web/templates/slot/index.html.eex && curl -o lib/fawkes_web/templates/speaker/index.html.eex https://raw.githubusercontent.com/nhu313/fawkes_nhu/master/lib/fawkes_web/templates/speaker/index.html.eex && curl -o lib/fawkes_web/templates/speaker/show.html.eex https://raw.githubusercontent.com/nhu313/fawkes_nhu/master/lib/fawkes_web/templates/speaker/show.html.eex && curl -o lib/fawkes_web/views/shared_view.ex https://raw.githubusercontent.com/nhu313/fawkes_nhu/master/lib/fawkes_web/views/shared_view.ex
 ```
 
-### Lab Add path for talk
+Restart your server. Press `Cmd` + `c` to quit. Then run:
 
-1. Add a route
+```
+mix phx.server
+```
+
+
+### Exercise: Load speakers
+1. In the `lib/fawkes/schedule/schedule.ex`, update the function `list_speakers`
+2. It should preload `talk`
+3. Go to [http://localhost:4000/speakers](http://localhost:4000/speakers), make sure the speaker loads
+
+### Exercise #2: Show talk
+
+Lab Add path for talk
+
+1. Add a route to show talk `/talks/:id`
 2. Add a controler to handle the route
-3. In Schedule, retrieve the talk
+3. In Schedule, retrieve the talk with a given id. Preload slot, ,speakers, ,categories, ,audience, ,location
 4. Add a view for the talk
-5. Add a template for the view
-
-def get_talk!(id) do
-    Talk
-    |> preload([:slot, :speakers, :categories, :audience, :location])
-    |> Repo.get_by!(id: id)
-  end
-
+5. Add a template for the view. Here's the HTML for it.
 
 ```
 <div class="container talk">
   <div class="card section">
-    <p class="subtext"><%= format_date(@talk.slot.start_time) %> <%= format_time(@talk.slot.start_time) %> - <%= format_time(@talk.slot.end_time) %></p>
+    <p class="subtext"><%= Timex.format!(@talk.slot.start_time, "%-I:%M %p", :strftime)%> - <%= Timex.format!(@talk.slot.end_time, "%-I:%M %p", :strftime) %></p>
     <h2><%= @talk.title %></h2>
     <p class="smalltext"><strong>Location</strong>: <%= @talk.location.name %></p>
     <p class="icons">
@@ -106,7 +110,7 @@ def get_talk!(id) do
           <img src="<%= speaker.image_url %>" class="rounded-circle">
         </div>
         <div class="col-sm-7 speaker__info">
-          <a href="/speakers/<%= speaker.id %>"<h4><%= full_name(speaker) %></h4></a>
+          <a href="/speakers/<%= speaker.id %>"<h4><%= FawkesWeb.SharedView.full_name(speaker) %></h4></a>
           <div class="speaker__handle">
             <i class="fab fa-github"></i> @<%= speaker.github %>
           </div>
@@ -145,3 +149,6 @@ def get_talk!(id) do
   </div>
 </div>
 ```
+
+Go to [http://localhost:4000/talks/1](http://localhost:4000/talks/1)
+It should work. 
