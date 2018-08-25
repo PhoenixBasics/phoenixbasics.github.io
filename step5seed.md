@@ -65,6 +65,13 @@ curl -o assets/css/zapp.css https://raw.githubusercontent.com/nhu313/fawkes_nhu/
 4. Add a view for the talk
 5. Add a template for the view
 
+def get_talk!(id) do
+    Talk
+    |> preload([:slot, :speakers, :categories, :audience, :location])
+    |> Repo.get_by!(id: id)
+  end
+
+
 ```
 <div class="container talk">
   <div class="card section">
