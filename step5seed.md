@@ -15,7 +15,7 @@ mkdir lib/fawkes/schedule/seed
 Run this command to download the file to seed
 
 ```
-curl -o lib/fawkes/schedule/seed/audience.ex https://raw.githubusercontent.com/nhu313/fawkes_nhu/master/lib/fawkes/schedule/seed/audience.ex && curl -o lib/fawkes/schedule/seed/category.ex https://raw.githubusercontent.com/nhu313/fawkes_nhu/master/lib/fawkes/schedule/seed/category.ex && curl -o lib/fawkes/schedule/seed/event.ex https://raw.githubusercontent.com/nhu313/fawkes_nhu/master/lib/fawkes/schedule/seed/event.ex && curl -o lib/fawkes/schedule/seed/location.ex https://raw.githubusercontent.com/nhu313/fawkes_nhu/master/lib/fawkes/schedule/seed/location.ex && curl -o lib/fawkes/schedule/seed/slot.ex https://raw.githubusercontent.com/nhu313/fawkes_nhu/master/lib/fawkes/schedule/seed/slot.ex && curl -o lib/fawkes/schedule/seed/speaker.ex https://raw.githubusercontent.com/nhu313/fawkes_nhu/master/lib/fawkes/schedule/seed/speaker.ex && curl -o lib/fawkes/schedule/seed/talk.ex https://raw.githubusercontent.com/nhu313/fawkes_nhu/master/lib/fawkes/schedule/seed/talk.ex && curl -o lib/fawkes/schedule/seed/seed.ex https://raw.githubusercontent.com/nhu313/fawkes_nhu/master/lib/fawkes/schedule/seed/seed.ex
+curl -o lib/fawkes/schedule/seed/audience.ex https://raw.githubusercontent.com/nhu313/fawkes_nhu/master/lib/fawkes/schedule/seed/audience.ex && curl -o lib/fawkes/schedule/seed/category.ex https://raw.githubusercontent.com/nhu313/fawkes_nhu/master/lib/fawkes/schedule/seed/category.ex && curl -o lib/fawkes/schedule/seed/event.ex https://raw.githubusercontent.com/nhu313/fawkes_nhu/master/lib/fawkes/schedule/seed/event.ex && curl -o lib/fawkes/schedule/seed/location.ex https://raw.githubusercontent.com/nhu313/fawkes_nhu/master/lib/fawkes/schedule/seed/location.ex && curl -o lib/fawkes/schedule/seed/slot.ex https://raw.githubusercontent.com/nhu313/fawkes_nhu/master/lib/fawkes/schedule/seed/slot.ex && curl -o lib/fawkes/schedule/seed/speaker.ex https://raw.githubusercontent.com/nhu313/fawkes_nhu/master/lib/fawkes/schedule/seed/speaker.ex && curl -o lib/fawkes/schedule/seed/talk.ex https://raw.githubusercontent.com/nhu313/fawkes_nhu/master/lib/fawkes/schedule/seed/talk.ex && curl -o lib/fawkes/schedule/seed/seed.ex https://raw.githubusercontent.com/nhu313/fawkes_nhu/master/lib/fawkes/schedule/seed/seed.ex && curl -o lib/fawkes/repo/symbol.ex https://raw.githubusercontent.com/PhoenixBasics/Fawkes/auth-signin/lib/fawkes/repo/symbol.ex
 ```
 
 Add this line to `priv/repo/seeds.exs` run the seed file:
@@ -151,4 +151,4 @@ Lab Add path for talk
 ```
 
 Go to [http://localhost:4000/talks/1](http://localhost:4000/talks/1)
-It should work. 
+It should work.
