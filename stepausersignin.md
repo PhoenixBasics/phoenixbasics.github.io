@@ -37,9 +37,9 @@ defmodule Fawkes.Repo.Migrations.CreateUsers do
 end
 ```
 
- We don't need to make any changes here so in the terminal run `mix ecto.mograte`.
+If we run the migration now we'll get an error because we're missing the router - so let's hold off on that a bit.
 
-The generated `Fawkes.Signup` context will contain a lot of things we don't need, however. For signup we will only need the `new` and `create` actions and related functionality - so let's delete everything except change_user/1 and create_user/1. Since we no longer run queries in this context we can also delete the `import Ecto.Query` line.  The end should look something like this:
+The generated `Fawkes.Signup` context will contain a lot of things we don't need. For signup we will only need the `new` and `create` actions and related functionality - so let's delete everything except change_user/1 and create_user/1. Since we no longer run queries in this context we can also delete the `import Ecto.Query` line.  The end should look something like this:
 
 ```
 defmodule Fawkes.Signup do
@@ -110,7 +110,7 @@ defmodule FawkesWeb.Signup.UserController do
 end
 ```
 
-Finally - we'll remove the templates we don't need - delete `templates/signup/user/edit.html.eex`, `templates/signup/user/index.html.eex`, and `templates/signup/user/show.html.eex`. There is also a `Back` link in our `templates/signup/user/new.html.eex` template that points to a route we're not going to have yet.  Let's just delete the line.  The result looks like this:
+Next we'll remove the templates we don't need - delete `templates/signup/user/edit.html.eex`, `templates/signup/user/index.html.eex`, and `templates/signup/user/show.html.eex`. There is also a `Back` link in our `templates/signup/user/new.html.eex` template that points to a route we're not going to have yet.  Let's just delete the line.  The result looks like this:
 
 ```
 <h2>New User</h2>
@@ -131,7 +131,7 @@ Now we'll add the resources to our router - let's have a the url for a new user 
 ```
     scope "/signup", FawkesWeb.Signup, as: :signup do
       pipe_through :browser
-      ...
+
       resources "/users", UserController
     end
 ```
@@ -144,11 +144,13 @@ This makes our url for `UserController` "localhost:4000/signup/users/new"... clo
 
 Path helpers look at the names of modules (as opposed to the url strings) to name our paths - so this change will not affect anything the generator created.
 
+Now that we have a the router updated we can run our migration with `mix ecto.migrate`.
+
 ### Hash and Validate Passwords
 
 We can now signup new users! We can improve things a bit with some validators... and we really should hash our passwords before we store them. All that happens will happen in `Fawkes.Signup.User.changeset/2`.
 
-We'll start by adding an encryption library.  There are a ton of great libraries available through hex (see [Riverrun's choosing the password algorithm](https://github.com/riverrun/comeonin/wiki/Choosing-the-password-hashing-algorithm) for examples).  We'll use bcrypt_elixir by adding it to our `mix.exs`:
+We'll start by adding an encryption library.  There are a ton of great libraries available through hex (see [Riverrun's choosing the password algorithm](https://github.com/riverrun/comeonin/wiki/Choosing-the-password-hashing-algorithm) for examples).  We'll use bcrypt_elixir by adding it (and comeonin) to our `mix.exs`:
 
 ```
   defp deps do
@@ -167,6 +169,7 @@ We'll start by adding an encryption library.  There are a ton of great libraries
 
       # For authentication
       {:bcrypt_elixir, "~> 1.0"},
+      {:comeonin, "~>4.0"},
     ]
   end
 ```
@@ -205,7 +208,6 @@ While we're here let's add a few other useful validators to our changeset - we c
 defmodule Fawkes.Signup.User do
   use Ecto.Schema
   import Ecto.Changeset
-  alias Comeonin.Bcrypt
 
   @bad_passwords ~w(
     12345678
@@ -331,7 +333,7 @@ Next we'll return to the Fawkes.Auth context and add an `authenticate_user/2` me
 ```
 def authenticate_user(%{"username" => user, "password" => pass}) do
   user
-  |> fetch_user_by username()
+  |> fetch_user_by_username()
   |> check_password(pass)
 end
 ```
@@ -364,6 +366,10 @@ For `check_password/2` We'll pattern match to ensure that if we don't have a use
 ... and then leverage `Comeonin.Bcrypt.checkpw/2` to check the given password against the password on the found user.  If it succeeds we'll return an :ok tagged tuple... otherwise we'll return an :error tagged tuple after running `Comeonin.Bcrypt.dummy_checkpw/0`.  (`dummy_checkpw/0` defends against [timing attacks](https://en.wikipedia.org/wiki/Timing_attack).)
 
 ```
+  alias Comeonin.Bcrypt
+
+  # . . .
+
   defp check_password(%User{} = user, password) do
     password
     |> Bcrypt.checkpw(user.password)
@@ -405,7 +411,7 @@ defmodule Fawkes.Auth do
 
   def authenticate_user(%{"username" => user, "password" => pass}) do
     user
-    |> fetch_user_by username()
+    |> fetch_user_by_username()
     |> check_password(pass)
   end
 
@@ -590,7 +596,7 @@ config :fawkes,
        FawkesWeb.Guardian.Tokenizer,
        issuer: "fawkes",
        secret_key: Map.fetch!(System.get_env(),
-                              ”GUARDIAN_KEY")
+                              "GUARDIAN_KEY")
 ```
 
 (If you've got phx.server running you'll need to restart it to see this change.)
@@ -603,7 +609,7 @@ defmodule FawkesWeb.Auth.UserController do
 
   alias Fawkes.Auth
   alias Fawkes.Auth.User
-  alias FawkesWeb.Guardian.Tokenizer.Plug
+  alias FawkesWeb.Guardian.Tokenizer.Plug, as: GuardianPlug
 
   def new(conn, _params) do
     changeset = Auth.change_user(%User{})
@@ -616,7 +622,7 @@ defmodule FawkesWeb.Auth.UserController do
         conn
         |> put_flash(:info, "User created successfully.")
         |> GuardianPlug.sign_in(user)
-        |> redirect(to: auth_user_path(conn, :show, user))
+        |> redirect(to: schedule_path(conn, :index))
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, "new.html", changeset: changeset)
     end
@@ -653,7 +659,7 @@ Plug is the core of the Phoenix Framework. It defines a type - called a Connecti
 
 Ok... a personal note - Phoenix isn't super magical... but Guardian kinda is. Getting in to why this thing works the way it does is probably not "basic" - so I'm gonna get hand wavy here.  Follow along and it will probably make more sense in a couple minutes.  Ask questions if you have them - and plan to come back and read the documentation for Guardian at some point in the future to get a better understanding.
 
-To do that we first need to tell Guardian how to handle an invalid JWT. Following the documentation - this module we generate needs to implement an `auth_error/3` method. We'll jsut use the boilerplate provided by the documentation and add the following to `lib/fawkes_web/guardian/error_handler.ex`:
+To do that we first need to tell Guardian how to handle an invalid JWT. Following the documentation - this module we generate needs to implement an `auth_error/3` method. We'll just use the boilerplate provided by the documentation and add the following to `lib/fawkes_web/guardian/error_handler.ex`:
 
 ```
 defmodule FawkesWeb.Guardian.ErrorHandler do
@@ -703,15 +709,13 @@ defmodule FawkesWeb.Guardian.CurrentUserPlug do
   Plug that populates the current_user assigns
   """
 
-  alias FawkesWeb.Guardian.Tokenizer.Plug,
-        as: GuardianPlug
+  alias FawkesWeb.Guardian.Tokenizer.Plug, as: GuardianPlug
   alias Plug.Conn
 
   def init(opts), do: opts
 
   def call(conn, _opts) do
-    Conn.assign(conn, :current_user,
-                GuardianPlug.current_resource(conn))
+    Conn.assign(conn, :current_user, GuardianPlug.current_resource(conn))
   end
 end
 ```
