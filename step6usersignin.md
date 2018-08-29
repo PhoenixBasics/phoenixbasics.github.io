@@ -18,8 +18,7 @@ We're going to have several user resources as part of this application - at the 
 Paste the following in our commandline:
 
 ```
-mix phx.gen.html Signup User users \
-username:string:unique password:string --web Signup
+mix phx.gen.html Signup User users username:string:unique password:string --web Signup
 ```
 
 This should seem rather familiar by now - it will generate all the files for a Signup.User context.  The `web` flag makes Phoenix generate a namespace for the web parts.  This will help us separate our authentication resources from our signup resources (more on that later).
@@ -260,8 +259,7 @@ You can read more on validations on the [Ecto.Changeset Hexdocs](https://hexdocs
 Now that we can sign up we need to be able to log in. The process will be almost identical.  Start with the generator:
 
 ```
-mix phx.gen.html Auth User users \
-username:string password:string --web Auth
+mix phx.gen.html Auth User users username:string password:string --web Auth
 ```
 
 This time we can delete the migration (since our new context will just use the same users table we generated before.)
