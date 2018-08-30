@@ -22,7 +22,7 @@ def show(conn, %{"id" => id}) do
 end
 ```
 
-Create a new file `template/category/show.html.eex` and add this code:
+Create a new file `lib/fawkes_web/templates/category/show.html.eex` and add this code:
 
 ```
 <h1>Category</h1>
@@ -39,7 +39,9 @@ get "/categories/:id", CategoryController, :show
 
 ## Delete Category
 
-In the `template/category/index.html.eex`, add this next to show:
+(Use `git checkout 3f.delete` to catch up with the class)
+
+In the `lib/fawkes_web/templates/category/index.html.eex`, add this next to show:
 
 ```
 <span><%= link "Delete", to: category_path(@conn, :delete, category), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-xs" %></span>
