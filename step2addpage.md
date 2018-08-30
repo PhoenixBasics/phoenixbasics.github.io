@@ -3,6 +3,7 @@ layout: page
 title: Add a page
 ---
 
+(Use `git checkout 2a.create_a_new_project` to catch up with the class)
 
 ## Add a page
 When a request is sent, Phoenix will look at the router file to figure out which controller handles the request. You can see all the routes by running `mix phx.routes` in the command line. To add a new endpoint, use this pattern: `[HTTP verb] [path], [controller], [function]`. Let's add an about page to our app. First we need to add a get path to our app.
@@ -22,8 +23,8 @@ When a request is sent, Phoenix will look at the router file to figure out which
       end
     ```
 
-  5. Create a new file `lib/fawkes_web/templates/page/about.html.eex`
-  6. Add the following content to the file:
+  5. Create a new template at `lib/fawkes_web/templates/page/about.html.eex`
+  6. Add the following content to the template:
 
   ```
   <div class="section-white">

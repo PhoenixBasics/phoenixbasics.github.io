@@ -3,6 +3,7 @@ layout: page
 title: Add a feature
 ---
 
+(Use `git checkout 3a.add_a_feature` to catch up with the class)
 
 Now we know how to add a route, let's add a new feature. We're going to add categories to tag what type of talk it is.
 
@@ -12,26 +13,26 @@ Let's use Phoenix to generate a model called Category.
 
 
 ```
-mix phx.gen.schema Schedule.Category categories slug:string:unique name:string icon_url:string
+mix phx.gen.schema Schedule.Category categories slug:string name:string icon_url:string
 
 ```
 
 DON'T run the migration yet.
 
-Running this command will create two files, a migration file (`priv/repo/migrations/20180803152910_create_categories.exs`) and a model file (`lib/fawkes/schedule/category.ex`). The migration file uses the timestamp to know which file to migrate first. https://hexdocs.pm/ecto/Ecto.Schema.html
+Running this command will create two files, a migration file (`priv/repo/migrations/20180803152910_create_categories.exs`) and a model file (`lib/fawkes/schedule/category.ex`). The migration file uses a timestamp as the first part of it's filename to know which file to migrate first.
 
-Our project uses Ecto to talk to the database. [Ecto](https://hexdocs.pm/ecto/Ecto.html) is a library that handles form of data validation and persistence. It consist of 4 parts:
-- Ecto.Repo - repositories are wrappers around the data store. Via the repository, we can create, update, destroy and query existing entries. A repository needs an adapter and credentials to communicate to the database
-- Ecto.Schema - schemas are used to map any data source into an Elixir struct
-- Ecto.Changeset - changesets provide a way for developers to filter and cast external parameters, as well as a mechanism to track and validate changes before they are applied to your data
-- Ecto.Query - written in Elixir syntax, queries are used to retrieve information from a given repository. Queries in Ecto are secure, avoiding common problems like SQL Injection, while still being composable, allowing developers to build queries piece by piece instead of all at once
+Our project uses Ecto to talk to the database. [Ecto](https://hexdocs.pm/ecto/Ecto.html) is a library that handles data validation and persistence. It consist of 4 parts:
+- Ecto.Repo - Repositories are wrappers around our data store (PostgreSQL in this case). Via the repository, we can create, update, destroy and query existing entries. A repository needs an adapter and credentials to communicate to the database
+- Ecto.Schema - Schemas are used to map tables into Elixir structs. They define all the fields and relationships - you can think of them as sort of the "Model" in an MVC pattern.
+- Ecto.Changeset - Changesets provide a way to filter and cast external parameters, as well as a mechanism to track and validate changes before they are applied to your data
+- Ecto.Query - Written in Elixir syntax, queries are used to retrieve information from a given repository. Queries in Ecto are secure, avoiding common problems like SQL Injection, while still being composable, allowing developers to build queries piece by piece instead of all at once
 
 You will learn more about as we continue to build this application.
 
-Let's add an index for the category name.
+Let's add a unique index for the category name to our migration.  Inside the `change` block but after the `create` block add the following:
 
 ```
-create index("categories", :name, unique: true)
+create unique_index(:categories, [:slug])
 ```
 
 By default, Ecto will make every field required. But we don't want the icon_url to be required because not all of them have an image associated with it. Let's open up `lib/fawkes/schedule/category.ex` and remove `icon_url` from the changeset validate_required function (line 18). So it would only require name and slug.
@@ -48,7 +49,9 @@ mix ecto.migrate
 
 ### Add a Context
 
-Create a new file called `lib/fawkes/schedule/schedule.ex`. Add the following code to the file:
+(Use `git checkout 3b.add_a_context` to catch up with the class)
+
+Create a context in a file called `lib/fawkes/schedule/schedule.ex`. Add the following code to the file:
 
 ```
 defmodule Fawkes.Schedule do
@@ -62,7 +65,7 @@ defmodule Fawkes.Schedule do
 end
 ```
 
-This will call the repository to get all the category.
+This will call the repository to get all the categories.
 
 ### Add a Controller
 
@@ -82,7 +85,7 @@ end
 
 ```
 
-Let's add a presenter by creating a file called `lib/fawkes_web/views/category_view.ex`. Add the following code to the view:
+Let's add a view so we can render templates for this controller by creating a file called `lib/fawkes_web/views/category_view.ex`. Add the following code to the view:
 
 ```
 defmodule FawkesWeb.CategoryView do
@@ -91,7 +94,7 @@ defmodule FawkesWeb.CategoryView do
 end
 ```
 
-Create a new folder called `category` in `lib/fawkes_web/templates`. Add a new file called `lib/fawkes_web/templates/index.html.eex`. Add the following code to display the category.
+Create a new folder called `category` in `lib/fawkes_web/templates`. Add a new file called `lib/fawkes_web/templates/category/index.html.eex`. Add the following code to display the category.
 
 ```
 <h2>Categories</h2>
@@ -128,6 +131,8 @@ Now go to [http://localhost:4000/categories](http://localhost:4000/categories)
 Woohoo! We have a page for the category. Since we don't have any category, our page is empty. Let's add a page to create a category.
 
 ### Add a category form
+
+(Use `git checkout 3c.add_a_category_form` to catch up with the class)
 
 First let's create a form to add a category. Create a new file called `lib/fawkes_web/templates/category/new.html.eex`. Add the following code to the file:
 
@@ -219,6 +224,9 @@ Go to http://localhost:4000/categories/new, add a new category and hit submit. C
 
 
 ### Show
+
+(Use `git checkout 3d.exercise-implement_category_show` to catch up with the class)
+
 Exercise #1: Implement the show category
 
 When a user sends GET request to `http://localhost:4000/categories/1`, the application will displays the category's name, slug, icon_url.

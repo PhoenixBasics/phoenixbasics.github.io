@@ -18,11 +18,13 @@ mix phx.new fawkes
 
 Running that command will generate the Phoenix application for you. After the file creation, it will ask you to fetch and install dependencies. Type `y`.
 
+(if you're following along with the https://github.com/PhoenixBasics/fawkes - you'll want to run `mix phx.new` in the folder where you git cloned the repo... not in the project folder itself.)
+
 ```
 Fetch and install dependencies? [Yn] y
 ```
 
-By saying yes, it ran these commands for you:
+By saying yes, it these commands will be run for you:
 
 This commands downloads your dependencies:
 
@@ -30,19 +32,19 @@ This commands downloads your dependencies:
 mix deps.get
 ```
 
-Phoenix uses Brunch.io for asset management by default. Brunch.io’s dependencies are installed via the node package manager, not mix. This command install your node dependencies:
+Phoenix uses Brunch.io for asset management by default. Brunch.io’s dependencies are installed via the node package manager, not mix. SoT this command will install your node dependencies:
 
 ```
 cd assets && npm install && node node_modules/brunch/bin/brunch build
 ```
 
-This compile the project:
+This compiles the project:
 
 ```
 mix deps.compile
 ```
 
-Note that Phoenix auto reload for you so you don't have to run compile every time you make a file change.
+Note that Phoenix will auto-reload your code for you so you don't have to run compile every time you make a file change.
 
 ## Running the server
 After the application installed your dependencies, it tells you what to do next.
@@ -54,20 +56,20 @@ After the application installed your dependencies, it tells you what to do next.
   ```
 
 2. Open the application in your favorite editor
-3. Open the file `config/dev.exs`. Ensure your username and password for Postgres is correct.
-2. Ecto allows our Phoenix application to communicate with a data store, such as PostgreSQL or MongoDB. Create your database by running:
+3. Open the file `config/dev.exs` and Ensure your username and password for Postgres is correct.
+4. Ecto allows our Phoenix application to communicate with a data store -- PostgreSQL in this case. Create your database from the commandline by running:
 
   ```
   mix ecto.create
   ```
 
-4. Start your server
+5. Start your server
 
   ```
   mix phx.server
   ```
 
-5. Open [http://localhost:4000](http://localhost:4000) in your favorite browser.
+6. Open [http://localhost:4000](http://localhost:4000) in your favorite browser.
 
 ## Congratulations, you got a server!!!
 
