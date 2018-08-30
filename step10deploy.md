@@ -74,5 +74,6 @@ config :fawkes, Fawkes.Repo,
 3. Run `mix phx.gen.secret` and set the SECRET_KEY_BASE to the generated string
 4. Run `mix phx.gen.secret` and set the GUARDIAN_KEY to the generated string
 5. Add in your S3 bucket, access key, and secret key
-6. Run `chmod u+x deploy.sh` to make the file executable
-7. Run `./deploy.sh`
+6. If you're on a branch, change `git push heroku master` to `git push heroku branchname:master`
+7. Run `chmod u+x deploy.sh` to make the file executable
+8. Run `./deploy.sh`
