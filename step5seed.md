@@ -2,20 +2,14 @@
 layout: page
 title: Populate the database
 ---
-
+(Use git checkout `5.seed` to catch up with the class)
 
 Now that we have our modules, let's connect them all together?
 
-Make a direction in `schedule` called `seed`
+Run this command to get the seed files:
 
 ```
-mkdir lib/fawkes/schedule/seed
-```
-
-Run this command to download the file to seed
-
-```
-curl -o lib/fawkes/schedule/seed/audience.ex https://raw.githubusercontent.com/nhu313/fawkes_nhu/master/lib/fawkes/schedule/seed/audience.ex && curl -o lib/fawkes/schedule/seed/category.ex https://raw.githubusercontent.com/nhu313/fawkes_nhu/master/lib/fawkes/schedule/seed/category.ex && curl -o lib/fawkes/schedule/seed/event.ex https://raw.githubusercontent.com/nhu313/fawkes_nhu/master/lib/fawkes/schedule/seed/event.ex && curl -o lib/fawkes/schedule/seed/location.ex https://raw.githubusercontent.com/nhu313/fawkes_nhu/master/lib/fawkes/schedule/seed/location.ex && curl -o lib/fawkes/schedule/seed/slot.ex https://raw.githubusercontent.com/nhu313/fawkes_nhu/master/lib/fawkes/schedule/seed/slot.ex && curl -o lib/fawkes/schedule/seed/speaker.ex https://raw.githubusercontent.com/nhu313/fawkes_nhu/master/lib/fawkes/schedule/seed/speaker.ex && curl -o lib/fawkes/schedule/seed/talk.ex https://raw.githubusercontent.com/nhu313/fawkes_nhu/master/lib/fawkes/schedule/seed/talk.ex && curl -o lib/fawkes/schedule/seed/seed.ex https://raw.githubusercontent.com/nhu313/fawkes_nhu/master/lib/fawkes/schedule/seed/seed.ex && mkdir lib/fawkes/repo/ && curl -o lib/fawkes/repo/symbol.ex https://raw.githubusercontent.com/PhoenixBasics/Fawkes/auth-signin/lib/fawkes/repo/symbol.ex
+git merge seeds
 ```
 
 Add this line to `priv/repo/seeds.exs` run the seed file:
@@ -31,6 +25,7 @@ mix run priv/repo/seeds.exs
 ```
 
 ### Querying for data
+(Use git checkout `5a.querydata` to catch up with the class)
 
 When we load the schedule, we want to load the talk, slot, location, and category. Let's open `lib/fawkes/schedule/schedule.ex`. First thing we want to do add the ability to query. So import in `Ecto.Query` on line 4.
 
@@ -48,10 +43,10 @@ Slot
 |> Enum.group_by(&(Timex.beginning_of_day(&1.start_time)))
 ```
 
-Now let's update our layout
+Now let's update our layout by merging the the schedule_layouts branch.
 
 ```
-curl -o lib/fawkes_web/templates/slot/index.html.eex https://raw.githubusercontent.com/nhu313/fawkes_nhu/master/lib/fawkes_web/templates/slot/index.html.eex && curl -o lib/fawkes_web/templates/speaker/index.html.eex https://raw.githubusercontent.com/nhu313/fawkes_nhu/master/lib/fawkes_web/templates/speaker/index.html.eex && curl -o lib/fawkes_web/templates/speaker/show.html.eex https://raw.githubusercontent.com/nhu313/fawkes_nhu/master/lib/fawkes_web/templates/speaker/show.html.eex && curl -o lib/fawkes_web/views/shared_view.ex https://raw.githubusercontent.com/nhu313/fawkes_nhu/master/lib/fawkes_web/views/shared_view.ex
+git merge schedule_layouts
 ```
 
 Restart your server. Press `Cmd` + `c` to quit. Then run:
@@ -62,19 +57,27 @@ mix phx.server
 
 
 ### Exercise: Load speakers
-1. In the `lib/fawkes/schedule/schedule.ex`, update the function `list_speakers`
+(Use git checkout `5b.load_speaker` to catch up with the class)
+
+1. In the `lib/fawkes/schedule/schedule.ex`, find the function `list_profiles`. Change it to `list_speakers`.
 2. It should preload `talk`
+3. Open `lib/fawkes_web/controllers/speaker_controllers.ex`, update the `index` function to reference speakers instead of profile. The code should look like this:
+
+  ```
+    def index(conn, _params) do
+      speakers = Schedule.list_speakers()
+      render(conn, "index.html", speakers: speakers)
+    end
+  ```
+
 3. Go to [http://localhost:4000/speakers](http://localhost:4000/speakers), make sure the speaker loads
 
 ### Exercise #2: Show talk
 
 Lab Add path for talk
 
-1. Add a route to show talk `/talks/:id`
-2. Add a controler to handle the route
-3. In Schedule, retrieve the talk with a given id. Preload slot, ,speakers, ,categories, ,audience, ,location
-4. Add a view for the talk
-5. Add a template for the view. Here's the HTML for it.
+1. In `lib/fawkes/schedule/schedule.ex`, find the function `get_talk`. Preload slot, speakers, categories, audience, location
+2. Add a template for the view. Here's the HTML for it.
 
 ```
 <div class="container talk">
