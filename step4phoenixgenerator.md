@@ -33,50 +33,76 @@ Alright, let's check to see if it works [http://localhost:4000/audiences](http:/
 
 Well, that was a lot of work.
 
+## Other models
+(Use `git checkout 4a.generate_other_models` to catch up with the class)
+
 Let's generate a few more models for our application.
 
 ```
 mix phx.gen.html Schedule Slot schedule_slots slug:string:unique start_time:utc_datetime end_time:utc_datetime
 ```
 
-Let's add the route to our url
+Let's add the resource to our router `lib/fawkes_web/router.ex`:
 
 ```
 resources "/schedule_slots", SlotController
 ```
 
+Now let's add locations. Because we don't need the front end for this, we will only generate the schema:
+
 ```
 mix phx.gen.schema Schedule.Location locations slug:string:unique name:string
 ```
+
+Same for event. 
 
 ```
 mix phx.gen.schema Schedule.Event events slug:string:unique name:string slot_id:references:schedule_slots
 ```
 
-```
-mix phx.gen.schema Schedule.Talk talks slug:string:unique title:string slot_id:references:schedule_slots audience_id:references:audiences location_id:references:locations description:text
-```
+For the talk, we need to view the talks, so we will generate everything.
 
 ```
-mix phx.gen.html Schedule Speaker speakers talk_id:references:talks slug:string:unique image_url:string first:string last:string company:string github:string twitter:string description:text
+mix phx.gen.html Schedule Talk talks slug:string:unique title:string slot_id:references:schedule_slots audience_id:references:audiences location_id:references:locations description:text
+```
+
+Let's add the resource to our router `lib/fawkes_web/router.ex`:
+
+```
+resources "/talks", TalkController
+```
+
+## Speaker
+(Use `git checkout 4b.speaker` to catch up with the class)
+
+Before we generate the speaker, let's generate a migration to add citext to our database. Citext will ignore case when searching for text.
+
+```
+mix ecto.gen.migration enable_citext_extension
+```
+
+Open up the migration file `priv/repo/migrations/[date]_enable_citext_extension.exs`. Add code to add citext.
+
+```
+defmodule Fawkes.Repo.Migrations.EnableCitextExtension do
+  use Ecto.Migration
+
+  def change do
+    execute "CREATE EXTENSION citext", "DROP EXTENSION citext"
+  end
+end
+```
+
+Now we're ready to generate the speaker. 
+
+```
+mix phx.gen.html Schedule Speaker profiles talk_id:references:talks slug:string:unique image:string image_url:string first:string last:string company:string github:string twitter:string description:text
 ```
 
 Let's add the routes for the speakers:
 
 ```
 resources "/speakers", SpeakerController
-```
-
-Open up `lib/fawkes/schedule/speaker.ex`, (maybe line 24), remove company, github, twitter, and description from the required fields.
-
-```
-|> validate_required([:slug, :image_url, :first, :last])
-```
-
-Add `talk_id` to the cast
-
-```
-|> cast(attrs, [:slug, :image_url, :first, :last, :company, :github, :twitter, :description, :talk_id])
 ```
 
 We need one more migration to link the category to the talks:
@@ -110,7 +136,7 @@ mix ecto.migrate
 ```
 
 ## Relationships
-
+(Use `git checkout 4b.speaker` to catch up with the class)
 
 Now that we have our models generated, let's define their relationship. Open the `Category` module `lib/fawkes/schedule/category.ex` and add this code on line `10` to say that a `Category` has many talks.
 
@@ -129,6 +155,19 @@ A speaker belongs to a talk, so open `lib/fawkes/schedule/speaker.ex`, delete li
 ```
 belongs_to :talk, Fawkes.Schedule.Talk
 ```
+
+Remove company, github, twitter, and description from the required fields.
+
+```
+|> validate_required([:slug, :image_url, :first, :last])
+```
+
+Add `talk_id` to the cast
+
+```
+|> cast(attrs, [:slug, :image_url, :first, :last, :company, :github, :twitter, :description, :talk_id])
+```
+
 
 Open `lib/fawkes/schedule/talk.ex`, delete the fields for audience, location, slot. Add the following relationships:
 
