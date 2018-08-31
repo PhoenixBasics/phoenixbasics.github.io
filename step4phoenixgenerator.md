@@ -136,27 +136,27 @@ mix ecto.migrate
 ```
 
 ## Relationships
-(Use `git checkout 4b.speaker` to catch up with the class)
+(Use `git checkout 4c.relationships` to catch up with the class)
 
-Now that we have our models generated, let's define their relationship. Open the `Category` module `lib/fawkes/schedule/category.ex` and add this code on line `10` to say that a `Category` has many talks.
+Now that we have our models generated, let's define their relationship. Open the `Category` module `lib/fawkes/schedule/category.ex` and add this code in the schema, below the fields to say that a `Category` has many talks.
 
 ```
 many_to_many :talks, Fawkes.Schedule.Talk, join_through: "talks_categories"
 ```
 
-For `Audience` module `lib/fawkes/schedule/audience.ex`,
+For `Audience` module `lib/fawkes/schedule/audience.ex`, add add this code in the schema, below the fields to say that an audience has many talks.
 
 ```
 has_many :talks, Fawkes.Schedule.Talk
 ```
 
-A speaker belongs to a talk, so open `lib/fawkes/schedule/speaker.ex`, delete line 15 for the `talk_id` field and replace it with the belongs_to relationship:
+A speaker belongs to a talk, so open `lib/fawkes/schedule/speaker.ex`, delete the line for the `talk_id` field and replace it with the belongs_to relationship:
 
 ```
 belongs_to :talk, Fawkes.Schedule.Talk
 ```
 
-Remove company, github, twitter, and description from the required fields.
+Remove image, company, github, twitter, and description from the required fields.
 
 ```
 |> validate_required([:slug, :image_url, :first, :last])
@@ -165,11 +165,10 @@ Remove company, github, twitter, and description from the required fields.
 Add `talk_id` to the cast
 
 ```
-|> cast(attrs, [:slug, :image_url, :first, :last, :company, :github, :twitter, :description, :talk_id])
+|> cast(attrs, [:slug, :image, :image_url, :first, :last, :company, :github, :twitter, :description, :talk_id])
 ```
 
-
-Open `lib/fawkes/schedule/talk.ex`, delete the fields for audience, location, slot. Add the following relationships:
+Open `lib/fawkes/schedule/talk.ex`, <span style="color:red">delete the fields for audience, location, slot</span>. Add the following relationships:
 
 ```
 many_to_many :categories, Fawkes.Schedule.Category, join_through: "talks_categories"
@@ -177,6 +176,24 @@ belongs_to :audience, Fawkes.Schedule.Audience
 belongs_to :location, Fawkes.Schedule.Location
 belongs_to :slot, Fawkes.Schedule.Slot
 has_many :speakers, Fawkes.Schedule.Speaker
+```
+
+So that your schema section looks like this:
+
+```
+  schema "talks" do
+    field :description, :string
+    field :slug, :string
+    field :title, :string
+
+    many_to_many :categories, Fawkes.Schedule.Category, join_through: "talks_categories"
+    belongs_to :audience, Fawkes.Schedule.Audience
+    belongs_to :location, Fawkes.Schedule.Location
+    belongs_to :slot, Fawkes.Schedule.Slot
+    has_many :speakers, Fawkes.Schedule.Speaker
+
+    timestamps()
+  end
 ```
 
 For the `cast`, add in `:audience_id, :location_id, :slot_id` like this:
@@ -221,6 +238,7 @@ Open `lib/fawkes/schedule/event.ex`, add `slot_id` to the cast call.
 ```
 
 ### Add Timex dependency
+(Use `git checkout 4d.timex` to catch up with the class)
 
 Open `mix.exs`, after line 33 in the `deps` block, add a comma, then timex_ecto
 
