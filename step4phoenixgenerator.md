@@ -3,6 +3,7 @@ layout: page
 title: Phoenix Generator
 ---
 
+(Use `git checkout 4.phoenix_generator` to catch up with the class)
 
 Because adding CRUD application is so common, Phoenix comes with a task to generate all that code for us. Let's generate a model to represent the level of the talk (e.g. beginner, advance).
 

@@ -3,7 +3,7 @@ layout: page
 title: Add a feature
 ---
 
-(Use `git checkout 3a.add_a_feature` to catch up with the class)
+(Use `git checkout 3.add_a_feature` to catch up with the class)
 
 Now we know how to add a route, let's add a new feature. We're going to add categories to tag what type of talk it is.
 
@@ -49,7 +49,7 @@ mix ecto.migrate
 
 ### Add a Context
 
-(Use `git checkout 3b.add_a_context` to catch up with the class)
+(Use `git checkout 3a.add_a_context` to catch up with the class)
 
 Create a context in a file called `lib/fawkes/schedule/schedule.ex`. Add the following code to the file:
 
@@ -68,6 +68,8 @@ end
 This will call the repository to get all the categories.
 
 ### Add a Controller
+
+(Use `git checkout 3b.add_a_conroller` to catch up with the class)
 
 Now let's add a controller to handle the request. Create a new file called `lib/fawkes_web/controllers/category_controller.ex`. Add the following code to the file:
 
@@ -189,6 +191,8 @@ Ok, now go to http://localhost:4000/categories/new. Notice it gives you an error
 
 ### Create a category
 
+(Use `git checkout 3d.create_a_category` to catch up with the class)
+
 We need to add a function to save the data to the database. Open `lib/fawkes/schedule/schedule.ex` and add this code:
 
 ```
@@ -225,7 +229,7 @@ Go to http://localhost:4000/categories/new, add a new category and hit submit. C
 
 ### Show
 
-(Use `git checkout 3d.exercise-implement_category_show` to catch up with the class)
+(Use `git checkout 3e.show` to catch up with the class)
 
 Exercise #1: Implement the show category
 
