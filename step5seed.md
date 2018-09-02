@@ -43,10 +43,153 @@ Slot
 |> Enum.group_by(&(Timex.beginning_of_day(&1.start_time)))
 ```
 
-Now let's update our layout by merging the the schedule_layouts branch.
+Now, we need to add a shared view to help with formatting the layout. Create a filed called `lib/fawkes_web/views/shared_view.ex`. Add this code:
 
 ```
-git merge schedule_layouts
+defmodule FawkesWeb.SharedView do
+  use FawkesWeb, :view
+
+  def full_name(people) when is_list(people) do
+    people
+    |> Enum.map(&full_name/1)
+    |> Enum.join(" && ")
+  end
+
+  def full_name(person) do
+    person.first <> " " <> person.last
+  end
+end
+```
+
+Finally, let's update our layout. Open `lib/fawkes_web/templates/slot/index.html.eex`, and replace the code with this:
+
+```
+<div class="talk-index">
+  <div class="section-white">
+    <div class="container">
+      <div class="d-flex justify-content-center align-items-center dates">
+        <i class="fas fa-arrow-left"></i>
+        <%= for date <- conference_dates() do %>
+          <div class="card">
+            <div class="card-body">
+              <a href="/schedule_slots?date=<%= Timex.format!(date, "%Y-%m-%d", :strftime)%>">
+                <div class="dates__name smalltext"><%= Timex.format!(date, "%a", :strftime) %></div>
+                <div class="dates__number"><%= Timex.format!(date, "%e", :strftime) %></div>
+              </a>
+            </div>
+          </div>
+        <% end %>
+        <i class="fas fa-arrow-right"></i>
+      </div>
+      <div class="d-flex justify-content-center talk-index__tab">
+        <a href="/schedule_slots" class="talk-tab__link talk-tab__link-active"><h4 class="subheader">Full Schedule</h4></a>
+        <%= if @conn.assigns[:current_user] do %>
+          <a href="/agenda" class="talk-tab__link"><h4 class="subheader">My Agenda</h4></a>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <div class="container schedule">
+    <p class="alert alert-info" role="alert"></p>
+    <p class="alert alert-danger" role="alert"></p>
+    <%= for {date, slots} <- @schedule_slots do %>
+      <h2 class="schedule__date"><%= Timex.format!(date, "%A  %m/%d/%y", :strftime)%></h2>
+      <%= for slot <- slots do %>
+        <div class="card">
+          <div class="card-header">
+            <h4 class="subheader schedule__time">
+              <%= Timex.format!(slot.start_time, "%-I:%M %p", :strftime)%> - <%= Timex.format!(slot.end_time, "%-I:%M %p", :strftime) %>
+            </h4>
+          </div>
+          <div class="card-body">
+            <%= if slot.event do %>
+              <h3 class="gray"><%= slot.event.name %></h3>
+            <% else %>
+              <%= for talk <- slot.talks do %>
+                <div class="schedule__talk">
+                  <div class="float-right schedule__talk-link">
+                    <i class="fas fa-angle-right"></i>
+                  </div>
+                  <a href="/talks/<%= talk.id %>">
+                    <h3 class="schedule__talk-title">
+                      <%= talk.title %>
+                    </h3>
+                  </a>
+
+                  <div class="schedule__details">
+                    <%= FawkesWeb.SharedView.full_name(talk.speakers) %> &nbsp; | &nbsp; <%= talk.location.name %>
+                  </div>
+                  <p class="icons">
+                    <button class="btn talk__audience"><%= talk.audience.name %></button>
+                    <%= for category <- talk.categories do %>
+                        <%= if category.icon_url do %>
+                          <img src="<%= category.icon_url %>" alt="<%= category.name %>">
+                        <% else %>
+                          <button class="btn talk__category">
+                            <%= category.name %>
+                          </button>
+                        <% end %>
+                    <% end %>
+                  </p>
+                  <%= if @conn.assigns[:current_user] do %>
+                    <div class="schedule__action" data-talk-id="<%= talk.id %>">
+                      <div class="add-to-schedule">
+                        <i class="far fa-calendar-check"></i>
+                        ADD TO AGENDA
+                      </div>
+                      <div class="remove-from-schedule" style="display: none">
+                        <i class="far fa-trash-alt"></i>
+                        REMOVE FROM AGENDA
+                      </div>
+                    </div>
+                  <% end %>
+                </div>
+              <% end %> <!-- end for loop -->
+            <% end %> <!-- end if statement -->
+          </div>
+        </div>
+
+      <% end %>
+    <% end %>
+  </div>
+</div>
+
+<%= if @conn.assigns[:current_user] do %>
+  <script>
+    $(document).ready(function() {
+      $('.add-to-schedule').click(function(event) {
+        var parent = $(this).parent();
+        var talkId = parent.data('talk-id');
+        var data = { user_id: <%= @conn.assigns[:current_user].id %>, talk_id: talkId}
+
+        $.post( '/api/users_talks', data)
+            .done(function( data ) {
+              console.log(data.data.id);
+              console.log(parent.find('.remove-from-schedule'));
+              parent.find('.add-to-schedule').hide();
+              parent.find('.remove-from-schedule').data('user-talk-id', data.data.id).show();
+            });
+        })
+
+      $('.remove-from-schedule').click(function(event) {
+        var parent = $(this).parent();
+        var id = $(this).data('user-talk-id');
+
+        $.ajax({
+            url: '/api/users_talks/' + id,
+            type: 'DELETE',
+            success: function(result) {
+              parent.find('.add-to-schedule').show();
+              parent.find('.remove-from-schedule').hide();
+            }
+        });
+      });
+
+    });
+  </script>
+<% end %>
+
 ```
 
 Restart your server. Press `Cmd` + `c` to quit. Then run:
@@ -56,28 +199,46 @@ mix phx.server
 ```
 
 
-### Exercise: Load speakers
+### Exercise #1: Load speakers
 (Use git checkout `5b.load_speaker` to catch up with the class)
 
 1. In the `lib/fawkes/schedule/schedule.ex`, find the function `list_profiles`. Change it to `list_speakers`.
 2. It should preload `talk`
 3. Open `lib/fawkes_web/controllers/speaker_controllers.ex`, update the `index` function to reference speakers instead of profile. The code should look like this:
 
-  ```
-    def index(conn, _params) do
-      speakers = Schedule.list_speakers()
-      render(conn, "index.html", speakers: speakers)
-    end
-  ```
+      ```
+        def index(conn, _params) do
+          speakers = Schedule.list_speakers()
+          render(conn, "index.html", speakers: speakers)
+        end
+      ```
 
-3. Go to [http://localhost:4000/speakers](http://localhost:4000/speakers), make sure the speaker loads
+4. Let's update the layout. Open `lib/fawkes_web/templates/speaker/index.html.eex`
+
+      ```
+      <div class="container speaker-index">
+        <h4 class="subheader">Speakers</h4>
+        <div class="row attendee">
+          <%= for speaker <- @speakers do %>
+              <div class="card col-xs-4">
+                <div class="card-body ">
+                  <img src="<%= speaker.image_url %>" class="rounded-circle">
+                  <h4><%= link FawkesWeb.SharedView.full_name(speaker), to: speaker_path(@conn, :show, speaker) %></h4>
+                  <p><%= link speaker.talk.title, to: "/talks/#{speaker.talk.id}" %></p>
+                </div>
+              </div>
+          <% end %>
+        </div>
+      </div>
+      ```
+
+5. Go to [http://localhost:4000/speakers](http://localhost:4000/speakers), make sure the speaker loads
+
 
 ### Exercise #2: Show talk
 
-Lab Add path for talk
-
 1. In `lib/fawkes/schedule/schedule.ex`, find the function `get_talk`. Preload slot, speakers, categories, audience, location
-2. Add a template for the view. Here's the HTML for it.
+2. Open `lib/fawkes_web/templates/talk/show.html.eex`. Replace the content with this HTML:
 
 ```
 <div class="container talk">
@@ -139,7 +300,7 @@ Lab Add path for talk
         <div class="card-body">
           <img src="https://elixirconf.com/2018/images/speakers/boyd-multerer.jpg" class="rounded-circle">
           <i class="fas fa-check-circle attendee__check"></i>
-          <h4>Sandra Bullock</h4>
+          <h4>Name name</h4>
           <div class="speaker__handle">
             <i class="fab fa-github"></i> @TODO-GIthubhandle
           </div>
