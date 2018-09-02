@@ -6,27 +6,27 @@ title: Add a page
 (Use `git checkout 2.add_a_page` to catch up with the class)
 
 ## Add a page
-When a request is sent, Phoenix will look at the router file to figure out which controller handles the request. You can see all the routes by running `mix phx.routes` in the command line. To add a new endpoint, use this pattern: `[HTTP verb] [path], [controller], [function]`. Let's add an about page to our app. First we need to add a get path to our app.
+When a request is sent, Phoenix will look at the router file to figure out which controller handles the request. We can see all the routes by running `mix phx.routes` in the command line. To add a new endpoint, use this pattern: `[HTTP verb] [path], [controller], [function]`. Let's add an about page to our app. First we need to add a GET path to our app.
   1. Open `lib/fawkes_web/router.ex`
-  2. Under `pipe_through :browser`, on line 18, add the line below. This means when a GET request for `/about`, the `about` function in the `PageController` will handle the request.
+  2. Under `pipe_through :browser`, on line 18, add the line below to tell the application that  when a GET request for `/about`, the `about` function in the `PageController` will handle the request.
 
-    ```
-      get "/about", PageController, :about
-    ```
+      ```elixir
+        get "/about", PageController, :about
+      ```
 
   3. Open `lib/fawkes_web/controllers/page_controller.ex`
-  4. Add the function to handle the request after line 6:
+  4. Add the function to handle the request after the `index` function (maybe line 6):
 
-    ```
-      def about(conn, _params) do
-        render conn, "about.html"
-      end
-    ```
+      ```elixir
+        def about(conn, _params) do
+          render conn, "about.html"
+        end
+      ```
 
   5. Create a new template at `lib/fawkes_web/templates/page/about.html.eex`
   6. Add the following content to the template:
 
-  ```
+  ```html
   <div class="section-white">
 <div class="container">
   <div class="banner-wrapper">
@@ -77,20 +77,20 @@ When a request is sent, Phoenix will look at the router file to figure out which
 
   7. Create a new file named `assets/css/about.css`. Add the following content to style the about page:
 
-  ```
-  .banner-wrapper {
-    text-align: center;
-    margin-top: 20px;
-    margin-bottom: 20px;
-  }
+      ```
+      .banner-wrapper {
+        text-align: center;
+        margin-top: 20px;
+        margin-bottom: 20px;
+      }
 
-  .banner {
-    width: 390px;
-  }
-  ```
+      .banner {
+        width: 390px;
+      }
+      ```
 
   8. Go to [http://localhost:4000/about](http://localhost:4000/about)
 
-## Congratulations, you have a page!!!
+## Congratulations, we have a new page!!!
 
 <img src="http://wac.450f.edgecastcdn.net/80450F/thefw.com/files/2012/10/dancinggif.gif">

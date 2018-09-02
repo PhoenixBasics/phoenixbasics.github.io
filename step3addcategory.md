@@ -27,15 +27,15 @@ Our project uses Ecto to talk to the database. [Ecto](https://hexdocs.pm/ecto/Ec
 - Ecto.Changeset - Changesets provide a way to filter and cast external parameters, as well as a mechanism to track and validate changes before they are applied to your data
 - Ecto.Query - Written in Elixir syntax, queries are used to retrieve information from a given repository. Queries in Ecto are secure, avoiding common problems like SQL Injection, while still being composable, allowing developers to build queries piece by piece instead of all at once
 
-You will learn more about as we continue to build this application.
+We will learn more about as we continue to build this application.
 
-Let's add a unique index for the category name to our migration.  Inside the `change` block but after the `create` block add the following:
+Let's add a unique index for the category name to our migration. Inside the `change` block, after the `create` block, add the following:
 
 ```
 create unique_index(:categories, [:slug])
 ```
 
-By default, Ecto will make every field required. But we don't want the icon_url to be required because not all of them have an image associated with it. Let's open up `lib/fawkes/schedule/category.ex` and remove `icon_url` from the changeset validate_required function (line 18). So it would only require name and slug.
+By default, Ecto will make every field required. But we don't want the icon_url to be required because not all of them have an icon associated with it. Let's open up `lib/fawkes/schedule/category.ex` and remove `icon_url` from the changeset validate_required function (maybe line 18?). So it would only require name and slug.
 
 ```
     |> validate_required([:slug, :name])

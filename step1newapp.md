@@ -3,36 +3,33 @@ layout: page
 title: Create a new project
 ---
 
-
-To create a new project, type:
+Let's clone the project.
 
 ```
-mix phx.new [project name]
+git clone https://github.com/PhoenixBasics/fawkes
 ```
 
-Example:
+Don't navigate into the project. From where we clone the repo, let's create a new project named `fawkes`, type:
 
 ```
 mix phx.new fawkes
 ```
 
-Running that command will generate the Phoenix application for you. After the file creation, it will ask you to fetch and install dependencies. Type `y`.
-
-(if you're following along with the https://github.com/PhoenixBasics/fawkes - you'll want to run `mix phx.new` in the folder where you git cloned the repo... not in the project folder itself.)
+That command will generate the Phoenix application for us. After the file creation, it will ask us to fetch and install dependencies. Type `y`.
 
 ```
 Fetch and install dependencies? [Yn] y
 ```
 
-By saying yes, it these commands will be run for you:
+By saying yes, these commands will be run for us:
 
-This commands downloads your dependencies:
+This commands downloads our dependencies:
 
 ```
 mix deps.get
 ```
 
-Phoenix uses Brunch.io for asset management by default. Brunch.io’s dependencies are installed via the node package manager, not mix. SoT this command will install your node dependencies:
+Phoenix uses Brunch.io for asset management by default. Brunch.io’s dependencies are installed via the node package manager, not mix. This command will install our node dependencies:
 
 ```
 cd assets && npm install && node node_modules/brunch/bin/brunch build
@@ -44,42 +41,41 @@ This compiles the project:
 mix deps.compile
 ```
 
-Note that Phoenix will auto-reload your code for you so you don't have to run compile every time you make a file change.
+Note that Phoenix will auto-reload our code for us so we don't have to run compile every time we make a file change.
 
 ## Running the server
-After the application installed your dependencies, it tells you what to do next.
+After the application installed our dependencies, it tells us what to do next.
 
-1. Change into your project directory
+1. Change into our project directory
 
   ```
   cd fawkes
   ```
 
-2. Open the application in your favorite editor
-3. Open the file `config/dev.exs` and Ensure your username and password for Postgres is correct.
-4. Ecto allows our Phoenix application to communicate with a data store -- PostgreSQL in this case. Create your database from the commandline by running:
+2. Open the application in our editor
+3. Open the file `config/dev.exs` and ensure the username and password for Postgres is correct.
+4. Ecto allows our Phoenix application to communicate with a data store -- PostgreSQL in this case. Create our database from the command line by running:
 
   ```
   mix ecto.create
   ```
 
-5. Start your server
+5. Start our server
 
   ```
   mix phx.server
   ```
 
-6. Open [http://localhost:4000](http://localhost:4000) in your favorite browser.
+6. Open [http://localhost:4000](http://localhost:4000) in a browser.
 
-## Congratulations, you got a server!!!
+## Congratulations, we got a server!!!
 
 <img src="https://media.giphy.com/media/10Fqkgb4tQVtOo/giphy.gif">
 
 
 ### Prettifying the page
-Download these assets for styling and the about page:
+Merge in the assets branch to get the assets for our application.
 
 ```
-curl -o assets/css/zapp.css https://raw.githubusercontent.com/nhu313/fawkes_nhu/master/assets/css/zapp.css && curl -o lib/fawkes_web/templates/layout/app.html.eex https://raw.githubusercontent.com/nhu313/fawkes_nhu/master/lib/fawkes_web/templates/layout/app.html.eex && curl -o assets/static/images/elixirconf.png  https://raw.githubusercontent.com/nhu313/fawkes_nhu/master/assets/static/images/elixirconf.png && curl -o assets/static/images/hyatt.png  https://raw.githubusercontent.com/nhu313/fawkes_nhu/master/assets/static/images/hyatt.png
-
+git merge assets
 ```

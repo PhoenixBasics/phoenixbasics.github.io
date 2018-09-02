@@ -3,12 +3,6 @@ layout: page
 title: Add Member Signin
 ---
 
-### Let's get on the same page...
-
-To make sure everyone is at the same point - please stop your Phoenix server and clone `git@github.com:PhoenixBasics/Fawkes.git`.
-
-This will give us a basic app with a completed schedule to work with.
-
 ### Add a Signup Context
 
 Now that we have a schedule let's add the ability for members to join the site - this will allow us to let people curate their own agenda at the conference.
@@ -115,17 +109,19 @@ defmodule FawkesWeb.Signup.UserController do
 end
 ```
 
-Next we'll remove the templates we don't need - delete `templates/signup/user/edit.html.eex`, `templates/signup/user/index.html.eex`, and `templates/signup/user/show.html.eex`. There is also a `Back` link in our `templates/signup/user/new.html.eex` template that points to a route we're not going to have yet.  Let's just delete the line.  The result looks like this:
+Next we'll remove the templates we don't need - delete `templates/signup/user/edit.html.eex`, `templates/signup/user/index.html.eex`, and `templates/signup/user/show.html.eex`. There is also a `Back` link in our `templates/signup/user/new.html.eex` template that points to a route we're not going to have yet. Let's delete the line. Change the `h2` title to `Create Account`. Wrap the HTML in a div with a class named `container`. The result looks like this:
 
 ```
-<h2>New User</h2>
+<div class="container">
+  <h2>Create Account</h2>
 
-<%= render "form.html", Map.put(assigns, :action, signup_user_path(@conn, :create)) %>
+  <%= render "form.html", Map.put(assigns, :action, signup_user_path(@conn, :create)) %>
+</div>
 ```
 
 Now that we've removed what we don't need we can add what we do.
 
-First - passwords should use an html input element with the `type=password` attribute.  Open `templates/signup/user/form.html.eex` and change our password `text_input` to `password_input`.
+First - passwords should use an HTML input element with the `type=password` attribute.  Open `templates/signup/user/form.html.eex` and change our password `text_input` to `password_input`.
 
 ```
 <%= password_input f, :password, class: "form-control" %>
