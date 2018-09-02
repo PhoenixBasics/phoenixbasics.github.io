@@ -313,12 +313,13 @@ end
 
 ```
 
-Delete `templates/auth/user/edit.html.eex`, `templates/auth/user/index.html.eex`, and `templates/auth/user/show.html.eex`. Remove the `Back` link in our `templates/auth/user/new.html.eex`
+Delete `templates/auth/user/edit.html.eex`, `templates/auth/user/index.html.eex`, and `templates/auth/user/show.html.eex`. Remove the `Back` link in our `templates/auth/user/new.html.eex`. Add a div with the class `container` around it. Change the title to `Log in`. The final result looks like this:
 
 ```
-<h2>New User</h2>
-
-<%= render "form.html", Map.put(assigns, :action, auth_user_path(@conn, :create)) %>
+<div class="container">
+  <h2>Log in</h2>
+  <%= render "form.html", Map.put(assigns, :action, auth_user_path(@conn, :create)) %>
+</div>
 
 ```
 
@@ -838,28 +839,19 @@ end
 
 ### Adding Authentication Links to the Layout
 
-Finally we need to add links so that users can access signup, login and logout globally.  In our `lib/fawkes_web/templates/layout/app.html.eex` render a partial.
+Finally we need to add links so that users can access signup, login and logout globally.  In our `lib/fawkes_web/templates/layout/app.html.eex` render a partial. After the link for talk (maybe line 31), add this code to render a partial for session list.
 
 ```
-  <header class="header">
-    <nav role="navigation">
-      <ul class="nav nav-pills pull-right">
-        <%= render(__MODULE__, "session_list_items.html", conn: @conn) %>
-      </ul>
-    </nav>
-    <span class="logo"></span>
-  </header>
+<%= render(__MODULE__, "session_list_items.html", conn: @conn) %>
 ```
 
-and then add our signup and/o auth links in `lib/fawkes_web/templates/layout/session_list_items.html.eex`:
+Create a new file in the layout template folder `lib/fawkes_web/templates/layout/session_list_items.html.eex`. Add the following code to create an account and login.
 
 ```
-<li>
-  <%= if is_nil @conn.assigns[:current_user] do %>
-    <li><%= link gettext("Get Started"), to: signup_user_path(@conn, :new) %></li>
-    <li><%= link gettext("Log In"), to: auth_user_path(@conn, :new) %></li>
-  <% else %>
-    <%= link gettext("Logout"), to: auth_user_path(@conn, :delete), method: :post%>
-  <% end %>
-</li>
+<%= if is_nil @conn.assigns[:current_user] do %>
+  <li><%= link gettext("Create Account"), to: signup_user_path(@conn, :new) %></li>
+  <li><%= link gettext("Log In"), to: auth_user_path(@conn, :new) %></li>
+<% else %>
+  <li><%= link gettext("Logout"), to: user_path(@conn, :delete), method: :post%></li>
+<% end %>
 ```
