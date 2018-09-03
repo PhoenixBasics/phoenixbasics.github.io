@@ -6,7 +6,7 @@ title: Create a new project
 Let's clone the project.
 
 ```
-git clone https://github.com/PhoenixBasics/fawkes
+git clone https://github.com/PhoenixBasics/fawkes.git
 ```
 
 Don't navigate into the project. From where we clone the repo, let's create a new project named `fawkes`, type:
@@ -15,7 +15,7 @@ Don't navigate into the project. From where we clone the repo, let's create a ne
 mix phx.new fawkes
 ```
 
-That command will generate the Phoenix application for us. After the file creation, it will ask us to fetch and install dependencies. Type `y`.
+When asked to continue because the folder exist, type `y` to say yes. The above command will generate the Phoenix application for us. After the file creation, it will ask us to fetch and install dependencies. Type `y`.
 
 ```
 Fetch and install dependencies? [Yn] y
