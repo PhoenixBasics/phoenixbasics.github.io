@@ -94,3 +94,6 @@ When a request is sent, Phoenix will look at the router file to figure out which
 ## Congratulations, we have a new page!!!
 
 <img src="http://wac.450f.edgecastcdn.net/80450F/thefw.com/files/2012/10/dancinggif.gif">
+
+## Resources
+1. https://hexdocs.pm/phoenix/routing.html#content

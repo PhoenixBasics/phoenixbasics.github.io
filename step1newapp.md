@@ -74,6 +74,7 @@ After the application installed our dependencies, it tells us what to do next.
 
 
 ### Prettifying the page
+
 Merge in the assets branch to get the assets for our application.
 
 ```

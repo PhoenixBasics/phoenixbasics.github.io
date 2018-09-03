@@ -4,6 +4,7 @@ title: Add User Profiles
 ---
 
 ### Set up image uploads with S3
+(Use `git checkout 7.user_profile` to catch up with the class)
 
 Before we get started - we'll want to be able to upload images for users as part of their profiles.  Since we're deploying to Heroku (and Heroku doesn't have local file storage on our tier) we'll need to work out some other solution.  In this case - we'll set up our application to leverage S3.
 
@@ -44,7 +45,7 @@ Repeat that process for test.  Similar to before; for production we'll want to h
 
 ```
 config :arc,
-       bucket: Map.fetch!(System.get_env(),  “S3_BUCKET")
+       bucket: Map.fetch!(System.get_env(),  "S3_BUCKET")
 
 config :ex_aws,
   access_key_id: [Map.fetch!(System.get_env(), "AWS_ACCESS_KEY"), :instance_role],
@@ -67,6 +68,7 @@ end
 This is more or less based on the generator mentioned in docs for this file - however Arc hasn't been updated to the file structure used in newer versions of Phoenix (someone get on that for me...).
 
 ### Add S3 images to speaker profiles
+(Use `git checkout 7a.speaker_image` to catch up with the class)
 
 Now we can try this out.  Currently we have speakers which leverage the profiles table to get their data.  We'll reuse this table for user info - so let's try out image uploads on the Speaker seeds.
 
@@ -91,19 +93,39 @@ Then we'll need to add the `image` param to our changeset along with a call to `
 
 Our schema is now using S3 to store images!  We can try this out with the seeds. Go in to `lib/fawkes/schedule/seed/speaker.ex`.  You'll find the images all commented out. Let's uncomment those and then run `mix ecto.reset`.
 
-Our speaker images are now available on S3!  Now we just need to add them to the templates. Let's open the speaker/show.html.eex page and add the following:
+Our speaker images are now available on S3!  Now we just need to add them to the templates. Let's open the `speaker/show.html.eex` page replace the HTML with this:
 
 ```
-<%=
-  {@speaker.image, @speaker}
-  |> Fawkes.Uploader.Image.url()
-  |> img_tag()
-%>
+<div class="container speaker-details">
+  <div class="card details">
+    <div class="card-body">
+      <img src="<%= Fawkes.Uploader.Image.url({@speaker.image, @speaker}) %>" class="rounded-circle speaker-details__pic">
+      <div class="clearfix"></div>
+      <div class="speaker__info">
+        <h4><%= FawkesWeb.SharedView.full_name(@speaker) %></h4>
+        <div class="speaker__handle">
+          <i class="fab fa-github"></i> @<%= @speaker.github %>
+        </div>
+        <div class="speaker__handle">
+          <i class="fab fa-twitter"></i> @<%= @speaker.twitter %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr />
+  <h4 class="subheader">About</h4>
+  <p><%= @speaker.description %></p>
+
+</div>
 ```
 
-`Fawkes.Uploader.Image.url()` takes that tuple and generates the correct url to use to grab the image.
+
+Note on line 4, it calls `Fawkes.Uploader.Image.url()`, which takes the tuple and generates the correct image url.
+
 
 ### Add the profile schema
+(Use `git checkout 7b.profile_schema` to catch up with the class)
 
 Our membership profile schema will look very similar to the speaker with the addition of a `belongs_to` statement:
 
@@ -114,28 +136,25 @@ defmodule Fawkes.Membership.Profile do
   use Ecto.Schema
   use Arc.Ecto.Schema
   import Ecto.Changeset
-  alias Fawkes.Repo.Symbol, as: SymbolType
 
   schema "profiles" do
     field(:company, :string)
     field(:description, :string)
     field(:first, :string)
     field(:github, :string)
-    field(:image, Fawkes.ImageUploader.Type)
+    field(:image, Fawkes.Uploader.Image.Type)
     field(:last, :string)
-    field(:slug, SymbolType)
+    field :slug, :string
     field(:twitter, :string)
-    field(:title, :string)
 
     belongs_to(:user, Fawkes.Profile.User)
 
     timestamps()
   end
 end
-
 ```
 
-We'll want to add `has_one(:profile, Fawkes.Membership.Profile)` to our Membership.User schema. We'll need a migration to complete that task - in terminal run `mix ecto.gen.migration add_user_id_to_profiles` and then add our alter table statement:
+Open `lib/fawkes/membership/user.ex`. Add `has_one(:profile, Fawkes.Membership.Profile)` to our the schema. We'll need a migration to complete that task - in terminal run `mix ecto.gen.migration add_user_id_to_profiles` and then add our alter table statement:
 
 ```
 defmodule Fawkes.Repo.Migrations.AddUserIdToProfiles do
@@ -170,14 +189,14 @@ end
 
 ```
 
-Next let's add a method that will find or create a changeset for a user profile.  In `Fawkes.Membership` we'll two versions of profile_changeset - each using a different implementation of changeset on Profile.
+Next let's add a method that will find or create a changeset for a user profile.  In `Fawkes.Membership` add an alias for profile `alias Fawkes.Membership.Profile`. Now let's add two versions of profile_changeset - each using a different implementation of changeset on Profile.
 
 ```
-  defp profile_changeset(%User{profile: profile}) when not is_nil(profile) do
+  def profile_changeset(%User{profile: profile}) when not is_nil(profile) do
     Profile.changeset(profile, %{})
   end
 
-  defp profile_changeset(user)
+  def profile_changeset(user) do
     %Profile{}
     |> Profile.init_changeset(%{user_id: user.id, slug: "user_#{user.id}"})
     |> Repo.insert!()
@@ -252,7 +271,7 @@ We'll also need to add our changesets to `Fawkes.Membership.Profile`:
   @doc false
   def changeset(info, attrs) do
     info
-    |> cast(attrs, [:first, :last, :slug, :company, :title, :github, :twitter,
+    |> cast(attrs, [:first, :last, :slug, :company, :github, :twitter,
                     :description, :image])
     |> cast_attachments(attrs, [:image])
     |> validate_required([:first, :last])
@@ -262,8 +281,9 @@ We'll also need to add our changesets to `Fawkes.Membership.Profile`:
 ```
 
 ### Add profile edit page
+(Use `git checkout 7c.profile_edit` to catch up with the class)
 
-First we'll need a profile controller. For now we'll just implement the Edit and Update actions.
+First we'll need a profile controller. Create a new file named `lib/fawkes_web/controllers/profile_controller.ex`. For now we'll just implement the Edit and Update actions.
 
 ```
 defmodule FawkesWeb.ProfileController do
@@ -275,141 +295,129 @@ defmodule FawkesWeb.ProfileController do
     render(conn, "edit.html", changeset: Membership.profile_changeset(conn.assigns.current_user))
   end
 
-  def update(conn, %{"info" => params}) do
+  def update(conn, %{"profile" => params}) do
     case Membership.update_profile(conn.assigns.current_user, params) do
       {:ok, _} ->
         conn
         |> put_flash(:info, "User updated successfully.")
-        |> redirect(to: schedule_path(conn, :index))
+        |> redirect(to: slot_path(conn, :index))
 
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, "edit.html", changeset: changeset)
     end
   end
 end
-
-
 ```
 
-We'll need a ProfileView:
+We'll need a ProfileView. Create a new file named `lib/fawkes_web/views/profile_view.ex`:
 
 ```
 defmodule FawkesWeb.ProfileView do
   use FawkesWeb, :view
 end
-
 ```
 
-And the form template itself (with `multipart: true` set) in an edit.html.eex:
+Create a new folder named `profile` in `lib/fawkes_web/templates/`. Add the form template itself (with `multipart: true` set) in an edit.html.eex:
 
 ```
-<h2>Edit User</h2>
+<div class="container">
+  <h2>Edit User</h2>
 
-<%= form_for @changeset, profile_path(@conn, :update), [multipart: true], fn f -> %>
-  <%= if @changeset.action do %>
-    <div class="alert alert-danger">
-      <p><%= gettext("Oops, something went wrong! Please check the errors below.") %></p>
+  <%= form_for @changeset, membership_profile_path(@conn, :update), [multipart: true], fn f -> %>
+    <%= if @changeset.action do %>
+      <div class="alert alert-danger">
+        <p><%= gettext("Oops, something went wrong! Please check the errors below.") %></p>
+      </div>
+    <% end %>
+
+    <div class="form-group">
+      <%=
+        label(f, :first, class: "control-label") do
+          gettext("First Name")
+        end
+      %>
+      <%= text_input f, :first, class: "form-control" %>
+      <%= error_tag f, :first %>
+    </div>
+
+    <div class="form-group">
+      <%=
+        label(f, :last, class: "control-label") do
+          gettext("Last Name")
+        end
+      %>
+      <%= text_input f, :last, class: "form-control" %>
+      <%= error_tag f, :last %>
+    </div>
+
+    <div class="form-group">
+      <%=
+        label(f, :image, class: "control-label") do
+          gettext("Picture")
+        end
+      %>
+      <%= file_input f, :image, class: "form-control" %>
+      <%= error_tag f, :image %>
+    </div>
+
+    <div class="form-group">
+      <%=
+        label(f, :slug, class: "control-label") do
+          gettext("Profile URL")
+        end
+      %>
+      <%= text_input f, :slug, class: "form-control" %>
+      <%= error_tag f, :slug %>
+    </div>
+
+    <div class="form-group">
+      <%=
+        label(f, :company, class: "control-label") do
+          gettext("Company")
+        end
+      %>
+      <%= text_input f, :company, class: "form-control" %>
+      <%= error_tag f, :company %>
+    </div>
+
+    <div class="form-group">
+      <%=
+        label(f, :github, class: "control-label") do
+          gettext("Github")
+        end
+      %>
+      <%= text_input f, :github, class: "form-control" %>
+      <%= error_tag f, :github %>
+    </div>
+
+    <div class="form-group">
+      <%=
+        label(f, :twitter, class: "control-label") do
+          gettext("Twitter")
+        end
+      %>
+      <%= text_input f, :twitter, class: "form-control" %>
+      <%= error_tag f, :twitter %>
+    </div>
+
+    <div class="form-group">
+      <%=
+        label(f, :description, class: "control-label") do
+          gettext("Bio")
+        end
+      %>
+      <%= textarea f, :description, class: "form-control" %>
+      <%= error_tag f, :description %>
+    </div>
+
+    <div class="form-group">
+      <%= submit gettext("Submit"), class: "btn btn-primary" %>
     </div>
   <% end %>
-
-  <div class="form-group">
-    <%=
-      label(f, :first, class: "control-label") do
-        gettext("First Name")
-      end
-    %>
-    <%= text_input f, :first, class: "form-control" %>
-    <%= error_tag f, :first %>
-  </div>
-
-  <div class="form-group">
-    <%=
-      label(f, :last, class: "control-label") do
-        gettext("Last Name")
-      end
-    %>
-    <%= text_input f, :last, class: "form-control" %>
-    <%= error_tag f, :last %>
-  </div>
-
-  <div class="form-group">
-    <%=
-      label(f, :image, class: "control-label") do
-        gettext("Picture")
-      end
-    %>
-    <%= file_input f, :image, class: "form-control" %>
-    <%= error_tag f, :image %>
-  </div>
-
-  <div class="form-group">
-    <%=
-      label(f, :slug, class: "control-label") do
-        gettext("Profile URL")
-      end
-    %>
-    <%= text_input f, :slug, class: "form-control" %>
-    <%= error_tag f, :slug %>
-  </div>
-
-  <div class="form-group">
-    <%=
-      label(f, :company, class: "control-label") do
-        gettext("Company")
-      end
-    %>
-    <%= text_input f, :company, class: "form-control" %>
-    <%= error_tag f, :company %>
-  </div>
-
-  <div class="form-group">
-    <%=
-      label(f, :title, class: "control-label") do
-        gettext("Title")
-      end
-    %>
-    <%= text_input f, :title, class: "form-control" %>
-    <%= error_tag f, :title %>
-  </div>
-
-  <div class="form-group">
-    <%=
-      label(f, :github, class: "control-label") do
-        gettext("Github")
-      end
-    %>
-    <%= text_input f, :github, class: "form-control" %>
-    <%= error_tag f, :github %>
-  </div>
-
-  <div class="form-group">
-    <%=
-      label(f, :twitter, class: "control-label") do
-        gettext("Twitter")
-      end
-    %>
-    <%= text_input f, :twitter, class: "form-control" %>
-    <%= error_tag f, :twitter %>
-  </div>
-
-  <div class="form-group">
-    <%=
-      label(f, :description, class: "control-label") do
-        gettext("Bio")
-      end
-    %>
-    <%= textarea f, :description, class: "form-control" %>
-    <%= error_tag f, :description %>
-  </div>
-
-  <div class="form-group">
-    <%= submit gettext("Submit"), class: "btn btn-primary" %>
-  </div>
-<% end %>
-
+</div>
 ```
 
-And add them to our router where we use our ensure_auth pipeline. We'll add this as a singleton so that our url to edit teh current_users profile is just "/profile/edit"
+And add them to our router where we use our ensure_auth pipeline. We'll add this as a singleton so that our url to edit the current_users profile is just "/profile/edit"
 
 ```
   scope "/", FawkesWeb, as: :membership do
@@ -450,38 +458,50 @@ Note that we plan to look up users by the slug on profile.  We'll need to add th
 ... and we'll need to add an `index.html.eex`
 
 ```
-<ul>
-  <%= for profile <- @profiles do %>
-  <li><%= link("#{profile.first} #{profile.last}", to: profile_path(@conn, :show, profile.slug)) %></li>
-  <% end %>
-</ul>
-
+<div class="container speaker-index">
+  <h2 class="subheader">Members</h2>
+  <div class="row attendee">
+    <%= for profile <- @profiles do %>
+        <div class="card col-xs-4">
+          <div class="card-body ">
+            <img src="<%= Fawkes.Uploader.Image.url({profile.image, profile}) %>" class="rounded-circle">
+            <h4><%= link FawkesWeb.SharedView.full_name(profile), to: profile_path(@conn, :show, profile.slug) %></h4>
+          </div>
+        </div>
+    <% end %>
+  </div>
+</div>
 ```
 
 and a `show.html.eex`
 
 ```
-<div>
-  <%= {@user.image, @user} |> Fawkes.Uploader.Image.url() |> img_tag() %>
-  <h4><%= "#{@user.first} #{@user.last}" %></h4>
+<div class="container speaker-details">
+  <div class="card details">
+    <div class="card-body">
+      <img src="<%= Fawkes.Uploader.Image.url({@user.image, @user}) %>" class="rounded-circle speaker-details__pic">
+      <div class="clearfix"></div>
+      <div class="speaker__info">
+        <h4><%= FawkesWeb.SharedView.full_name(@user) %></h4>
+        <div class="speaker__handle">
+          <a href="https://github.com/<%= @user.github %>">
+            <i class="fab fa-github"></i> @<%= @user.github %>
+          </a>
+        </div>
+        <div class="speaker__handle">
+          <a href="https://twitter.com/<%= @user.twitter %>">
+            <i class="fab fa-twitter"></i> @<%= @user.twitter %>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
 
-  <%= unless is_nil(@user.github) && is_nil(@user.twitter) && is_nil(@user.company) && is_nil(@user.title) do %>
-    <ul>
-      <%= unless is_nil(@user.github) do %>
-      <li>Github: <%= link(@user.github, to: "https://github.com/#{@user.github}/") %></li>
-      <% end %>
-      <%= unless is_nil(@user.twitter) do %>
-      <li>Twitter: <%= link(@user.twitter, to: "https://twitter.com/#{@user.twitter}/") %></li>
-      <% end %>
-      <%= unless @user.title |> FawkesWeb.SharedView.employment(@user.company) |> is_nil do %>
-      <li><%= FawkesWeb.SharedView.employment(@user.title, @user.company) %></li>
-      <% end %>
-    </ul>
-  <% end %>
+  <hr />
+  <h4 class="subheader">About</h4>
+  <p><%= @user.description %></p>
 
-  <div><%= @user.description %></div>
 </div>
-
 ```
 
 (Which can easily be DRYed up with template partials)

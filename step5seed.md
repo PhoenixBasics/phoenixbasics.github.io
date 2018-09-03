@@ -199,7 +199,7 @@ mix phx.server
 ```
 
 
-### Exercise #1: Load speakers
+## Exercise #1: Load speakers
 (Use git checkout `5b.load_speaker` to catch up with the class)
 
 1. In the `lib/fawkes/schedule/schedule.ex`, find the function `list_profiles`. Change it to `list_speakers`.
@@ -235,7 +235,8 @@ mix phx.server
 5. Go to [http://localhost:4000/speakers](http://localhost:4000/speakers), make sure the speaker loads
 
 
-### Exercise #2: Show talk
+## Exercise #2: Show talk
+(Use git checkout `5c.show_talk` to catch up with the class)
 
 1. In `lib/fawkes/schedule/schedule.ex`, find the function `get_talk`. Preload slot, speakers, categories, audience, location
 2. Open `lib/fawkes_web/templates/talk/show.html.eex`. Replace the content with this HTML:
@@ -298,7 +299,7 @@ mix phx.server
     <%= for _ <- (1..10) do %>
       <div class="card col-sm-3">
         <div class="card-body">
-          <img src="https://elixirconf.com/2018/images/speakers/boyd-multerer.jpg" class="rounded-circle">
+          <img src="https://lh3.googleusercontent.com/-fEyw5rjNaN0/VIcChZfCYDI/AAAAAAAADfA/OW_u5voliss/w426-h351/good-job-job-lucky-star-konata-izumi-good-anime-otakus-1375040667.jpg" class="rounded-circle">
           <i class="fas fa-check-circle attendee__check"></i>
           <h4>Name name</h4>
           <div class="speaker__handle">

@@ -2,6 +2,7 @@
 layout: page
 title: API - Add talks to agenda
 ---
+(Use `git checkout 8.agenda` to catch up with the class)
 
 We need a way for user to add a talk to their agenda. Run this command to generate a user talk relationship.
 
@@ -29,14 +30,34 @@ scope "/api", FawkesWeb do
 end
 ```
 
-Now you're ready to save! Go to [http://localhost:4000/schedule_slots](http://localhost:4000/schedule_slots), click add to agenda on a few slot.
+Open up the `lib/fawkes_web/controller/user_talk_controller.ex`, and don't match the param. Change the param to `user_talk_params`, like this:
+
+```
+def create(conn, user_talk_params) do
+  with {:ok, %UserTalk{} = user_talk} <- Agenda.create_user_talk(user_talk_params) do
+    conn
+    |> put_status(:created)
+    |> put_resp_header("location", user_talk_path(conn, :show, user_talk))
+    |> render("show.json", user_talk: user_talk)
+  end
+end
+```
+
+Run the migration to create the table:
+
+```
+mix ecto.migrate
+```
+
+Now we're ready to save! Go to [http://localhost:4000/schedule_slots](http://localhost:4000/schedule_slots), click add to agenda on a few slot. We added the javascript to handle the add. If you open up your console, you can see the JSON the server sends.
 
 ### Showing my agenda
+(Use `git checkout 8a.show_agenda` to catch up with the class)
 
 Let's get our agendas. In your `router`, below `resources "/speakers", SpeakerController`, add a path to retrieve your agenda
 
 ```
-get "/agendas", AgendaController, :index
+get "/agenda", AgendaController, :index
 ```
 
 When the user hits this endpoint, we will retrieve all the talks for the current user. Let's create a new controller called `lib/fawkes_web/controller/agenda_controller.ex`. Add this code:
@@ -48,7 +69,7 @@ defmodule FawkesWeb.AgendaController do
   alias Fawkes.Agenda
 
   def index(conn, _params) do
-    talks = Agenda.list_talk_for_user(conn.assigns.current_user)
+    talks = Agenda.list_talk_for_user(conn.assigns.current_user.id)
     render(conn, "index.html", talks: talks)
   end
 end
@@ -59,10 +80,10 @@ Open `lib/fawkes/agenda/agenda.ex`, add in this function to retrieve the talks:
 ```
 alias Fawkes.Schedule.Talk
 
-def list_talk_for_user(%{id: id}) do
+def list_talk_for_user(user_id) do
   Talk
   |> preload([:slot, :speakers, :categories, :audience, :location])
-  |> join(:inner, [talk], user_talk in UserTalk, user_talk.talk_id == talk.id)
+  |> join(:inner, [talk], user_talk in UserTalk, user_talk.talk_id == talk.id and user_talk.user_id == ^user_id)
   |> Repo.all()
 end
 ```
@@ -121,10 +142,6 @@ Now let's get the HTML for the view. Create a new folder called `lib/fawkes_web/
                 <% end %>
             <% end %>
           </p>
-          <div class="add-to-schedule action">
-            <i class="far fa-calendar-check"></i>
-            ADD TO AGENDA
-          </div>
         </div>
       </div>
     <% end %>
@@ -135,8 +152,10 @@ Now let's get the HTML for the view. Create a new folder called `lib/fawkes_web/
 Go to [http://localhost:4000/agendas](http://localhost:4000/agendas). Note the talks you added are there.
 
 ### Exercise: View other user agenda
-1. Add a new endpoint `/agendas/:user_plug`
+(Use `git checkout 8b.others_agenda` to catch up with the class)
+
+1. Add a new endpoint `/agenda/:user_slug`
 2. Add a new function in the `lib/fawkes_web/controller/agenda_controller.ex`
-  a. First find the user with the given slug
-  b. Find the user agenda. You should be able to reuse `Agenda.list_talk_for_user(conn.assigns.current_user)`
+    - First find the profile with the given slug
+    - Find all the talks the user added to their profile given the user_id in the profile
 3. Since you're only displaying the talk, you can reuse the index template `render(conn, "index.html", talks: talks)`

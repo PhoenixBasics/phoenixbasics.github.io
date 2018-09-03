@@ -122,7 +122,7 @@ Create a new folder called `category` in `lib/fawkes_web/templates`. Add a new f
 </table>
 ```
 
-Open `lib/fawkes_web/router.ex`. On line 21, after the `get "/", PageController, :index` line, add the following code:
+Open `lib/fawkes_web/router.ex`. After the `get "/", PageController, :index` line, add the following code:
 
 ```
  get "/categories", CategoryController, :index
@@ -139,30 +139,32 @@ Woohoo! We have a page for the category. Since we don't have any category, our p
 First let's create a form to add a category. Create a new file called `lib/fawkes_web/templates/category/new.html.eex`. Add the following code to the file:
 
 ```
-<h2>New Category</h2>
-<%= form_for @changeset, category_path(@conn, :create), fn f -> %>
-  <%= if @changeset.action do %>
-    <div class="alert alert-danger">
-      <p>Oops, something went wrong! Please check the errors below.</p>
+<div class="container">
+  <h2>New Category</h2>
+  <%= form_for @changeset, category_path(@conn, :create), fn f -> %>
+    <%= if @changeset.action do %>
+      <div class="alert alert-danger">
+        <p>Oops, something went wrong! Please check the errors below.</p>
+      </div>
+    <% end %>
+
+    <div class="form-group">
+      <%= label f, :name, class: "control-label" %>
+      <%= text_input f, :name, class: "form-control" %>
+      <%= error_tag f, :name %>
+    </div>
+
+    <div class="form-group">
+      <%= label f, :slug, class: "control-label" %>
+      <%= text_input f, :slug, class: "form-control" %>
+      <%= error_tag f, :slug %>
+    </div>
+
+    <div class="form-group">
+      <%= submit "Submit", class: "btn btn-primary" %>
     </div>
   <% end %>
-
-  <div class="form-group">
-    <%= label f, :name, class: "control-label" %>
-    <%= text_input f, :name, class: "form-control" %>
-    <%= error_tag f, :name %>
-  </div>
-
-  <div class="form-group">
-    <%= label f, :slug, class: "control-label" %>
-    <%= text_input f, :slug, class: "form-control" %>
-    <%= error_tag f, :slug %>
-  </div>
-
-  <div class="form-group">
-    <%= submit "Submit", class: "btn btn-primary" %>
-  </div>
-<% end %>
+</div>
 ```
 
 In `lib/fawkes_web/router.ex`, add a new line on line 21, before the category index. Add a new path to get the form:
@@ -187,7 +189,7 @@ def category_changeset(changeset \\ %Category{}) do
 end
 ```
 
-Ok, now go to http://localhost:4000/categories/new. Notice it gives you an error because we didn't define the path to post the data.
+Ok, now go to [http://localhost:4000/categories/new](http://localhost:4000/categories/new). Notice it gives you an error because we didn't define the path to post the data.
 
 ### Create a category
 
@@ -224,25 +226,36 @@ In your router (`lib/fawkes_web/router.ex`), add a new path post call to create 
 post "/categories", CategoryController, :create
 ```
 
-Go to http://localhost:4000/categories/new, add a new category and hit submit. Congrats. It is saving in the database.
+Go to [http://localhost:4000/categories/new](http://localhost:4000/categories/new), add a new category and hit submit. Congrats. It is saving in the database.
 
 
 ### Show
 
-(Use `git checkout 3e.show` to catch up with the class)
+(Use `git checkout 3e.show_category` to catch up with the class)
 
 Exercise #1: Implement the show category
 
 When a user sends GET request to `http://localhost:4000/categories/1`, the application will displays the category's name, slug, icon_url.
-Hint: To get a category from a repo: `Repo.get!(Category, id)`
+Hints:
+1. `get "/categories/:id"` will store the value after categories as an id
+2. To get a value out of a map you give it the key `params["id"]` or you can pattern match the map to `%{"id" => id}`
+3. To get a category from a repo: `Repo.get!(Category, id)`
 
 ### Resources:
 - [https://hexdocs.pm/ecto/Ecto.Repo.html](https://hexdocs.pm/ecto/Ecto.Repo.html)
 - [https://hexdocs.pm/phoenix/Phoenix.Controller.html](https://hexdocs.pm/phoenix/Phoenix.Controller.html)
 
 ### Delete
+(Use `git checkout 3f.delete_category` to catch up with the class)
+
 Optional Exercise: Implement the delete feature.
 
 When a user sends DELETE request to `http://localhost:4000/categories/1`, the application will delete the category with ID 1 and redirect the user to `/categories`.
 
 Hint: To delete a category from a repo `Repo.delete(category)`. To redirect to category index `redirect(conn, to: category_path(conn, :index))`
+
+Add this next to the show category link in `lib/fawkes_web/templates/category/index.html.eex` to test out the functionality.
+
+```
+<%= link "Delete", to: category_path(@conn, :delete, category), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-xs" %>
+```

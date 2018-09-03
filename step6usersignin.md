@@ -4,6 +4,7 @@ title: Add Member Signin
 ---
 
 ### Add a Signup Context
+(Use `git checkout 6.usersignin` to catch up with the class)
 
 Now that we have a schedule let's add the ability for members to join the site - this will allow us to let people curate their own agenda at the conference.
 
@@ -82,7 +83,7 @@ defmodule Fawkes.Signup do
 end
 ```
 
-We'll do something similar to the controller - remove everything from `FawkesWeb.Signup.UserController` that isn't `new/2` or `create/2`. We'll also change the redirect on success in `create/2` to point to the schedule index page. It'll look like this:
+We'll do something similar to the controller - remove everything from `FawkesWeb.Signup.UserController` that isn't `new/2` or `create/2`. We'll also change the redirect on success in `create/2` to point to `slot_path(conn, :index)`. It'll look like this:
 
 ```
 defmodule FawkesWeb.Signup.UserController do
@@ -119,7 +120,7 @@ Next we'll remove the templates we don't need - delete `templates/signup/user/ed
 </div>
 ```
 
-Now that we've removed what we don't need we can add what we do.
+Now that we've removed what we don't need we can add what we do need.
 
 First - passwords should use an HTML input element with the `type=password` attribute.  Open `templates/signup/user/form.html.eex` and change our password `text_input` to `password_input`.
 
@@ -148,6 +149,7 @@ Path helpers look at the names of modules (as opposed to the url strings) to nam
 Now that we have a the router updated we can run our migration with `mix ecto.migrate`.
 
 ### Hash and Validate Passwords
+(Use `git checkout 6a.password` to catch up with the class)
 
 We can now signup new users! We can improve things a bit with some validators... and we really should hash our passwords before we store them. All that happens will happen in `Fawkes.Signup.User.changeset/2`.
 
@@ -251,6 +253,7 @@ end
 You can read more on validations on the [Ecto.Changeset Hexdocs](https://hexdocs.pm/ecto/Ecto.Changeset.html).
 
 ### Add an Auth Context
+(Use `git checkout 6b.auth` to catch up with the class)
 
 Now that we can sign up we need to be able to log in. The process will be almost identical.  Start with the generator:
 
@@ -285,7 +288,7 @@ defmodule Fawkes.Auth do
 end
 ```
 
-Remove everything but `new/2` and `create/2` from `FawkesWeb.Auth.UserController`.  (We'll eventually need a `delete/2`) but the implementation is different so we'll delete the generated default. Change the redirect on successs in `create/2` to the schedule index.  The result will look like:
+Remove everything but `new/2` and `create/2` from `FawkesWeb.Auth.UserController`.  (We'll eventually need a `delete/2`) but the implementation is different so we'll delete the generated default. Change the redirect on successs in `create/2` to `slot_path(conn, :index)`.  The result will look like:
 
 ```
 defmodule FawkesWeb.Auth.UserController do
@@ -354,7 +357,7 @@ def fetch_user_by_username(username) do
 end
 ```
 
-For `check_password/2` We'll pattern match to ensure that if we don't have a user we just return false:
+For `check_password/2` we'll pattern match to ensure that if we don't have a user we just return false:
 
 ```
   defp check_password(%User{} = user, password) do
@@ -364,7 +367,7 @@ For `check_password/2` We'll pattern match to ensure that if we don't have a use
   defp check_password(_, _), do: {:error, :incorrect}
 ```
 
-... and then leverage `Comeonin.Bcrypt.checkpw/2` to check the given password against the password on the found user.  If it succeeds we'll return an :ok tagged tuple... otherwise we'll return an :error tagged tuple after running `Comeonin.Bcrypt.dummy_checkpw/0`.  (`dummy_checkpw/0` defends against [timing attacks](https://en.wikipedia.org/wiki/Timing_attack).)
+... and then leverage `Comeonin.Bcrypt.checkpw/2` to check the given password against the password on the found user.  If it succeeds we'll return an :ok tagged tuple... otherwise we'll return an :error tagged tuple after running `Comeonin.Bcrypt.dummy_checkpw/0`.  (`dummy_checkpw/0` defends against [timing attacks](https://en.wikipedia.org/wiki/Timing_attack).) Alias Bcrypt and add the check password function.
 
 ```
   alias Comeonin.Bcrypt
@@ -467,6 +470,7 @@ end
 ```
 
 ### Add a Membership Context
+(Use `git checkout 6c.membership` to catch up with the class)
 
 Now that we're able to assess whether a user is authentic we need to make that information available to our controllers somehow. We need a user data type to leverage outside the Auth and Signup contexts.  This new user context will lack access to `password` and will give us a place to relate profiles and agendas without muddying the data types we use to signin and authenticate. To pull this off we'll generate a new `Membership` context.  First the `User`:
 
@@ -503,6 +507,7 @@ end
 ```
 
 ### Sign and Verify (or reject) Authentication Tokens
+(Use `git checkout 6d.signin` to catch up with the class)
 
 Now that we've defined `Fawkes.Membership.User` to use throughout the app - we need to figure out how to keep that data handy in a session once the user has authenticated.  For that we'll use Guardian - library that signs and verifies [JSON Web Tokens](https://jwt.io/). That topic is _deep_ so we're gonna accept the magic here. For now - Guardian is how we'll log people in. We'll add it (and Comeonin as a dependency) to our `mix.exs` file.
 
@@ -551,7 +556,7 @@ Then add to it our `subject_for_token/2`.  Later on we'll hand it a Signup or Au
   end
 ```
 
-Then we add `resource_from_claims/1` - this will need to return with an :ok tagged tuple with the Membership User or an :error tagged tuple.  Guardian will hand it a JWT "claim" - which will (by convention) store our token subject (the id) in a key called `"sub"`.
+Then we add `resource_from_claims/1` - this will need to return with an :ok tagged tuple with the Membership User or an :error tagged tuple.  Guardian will hand it a JWT "claim" - which will (by convention) store our token subject (the id) in a key called `"sub"`. Add `alias Fawkes.Membership`. Then add this function:
 
 ```
 def resource_from_claims(claims) do
@@ -602,7 +607,8 @@ config :fawkes,
 
 (If you've got phx.server running you'll need to restart it to see this change.)
 
-Now we're ready to sign our JWT.  In `FawkesWeb.Auth.UserController` we'll do that by calling a method from a meta-programmed module Guardian creates called `FawkesWeb.Guardian.Tokenizer.Plug.sign_in/2`.  The result (after some alias goodness) looks like this:
+Now we're ready to sign our JWT.  In `FawkesWeb.Auth.UserController` we'll do that by calling a method from a meta-programmed module Guardian creates called `FawkesWeb.Guardian.Tokenizer.Plug.sign_in/2`. Add this line `|> GuardianPlug.sign_in(user)
+` below the flash message in the create function. The result (after some alias goodness) looks like this:
 
 ```
 defmodule FawkesWeb.Auth.UserController do
@@ -653,6 +659,7 @@ We'll come back to delete later - for now let's add login new and create to our 
 ```
 
 ### Adding a Plug Pipelines for Authentication
+(Use `git checkout 6e.auth_pipeline` to catch up with the class)
 
 Ok - now we can sign and unsign authentication tokens... but to make the resource available we need to add a plug.
 
@@ -724,6 +731,7 @@ end
 Once we use this we can get our current_user by using `conn.assigns.current_user`.
 
 ### Using Our New Pipelines in the Router
+(Use `git checkout 6f.router_pipeline` to catch up with the class)
 
 That was a lot - let's set up our router and then show it in action. In the router we'll create a new pipeline called guardian which uses the two plugs we just created to verify JWTs:
 

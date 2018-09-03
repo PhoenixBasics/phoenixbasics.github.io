@@ -39,7 +39,7 @@ get "/categories/:id", CategoryController, :show
 
 ## Delete Category
 
-(Use `git checkout 3f.delete` to catch up with the class)
+(Use `git checkout 3f.delete_category` to catch up with the class)
 
 In the `lib/fawkes_web/templates/category/index.html.eex`, add this next to show:
 
@@ -57,12 +57,11 @@ In the `category_controller`, add this:
 
 ```
 def delete(conn, %{"id" => id}) do
-    category = Schedule.get_category!(id)
-    {:ok, _category} = Schedule.delete_category(category)
+  {:ok, _category} = Schedule.delete_category(id)
 
-    conn
-    |> put_flash(:info, "Category deleted.")
-    |> redirect(to: category_path(conn, :index))
+  conn
+  |> put_flash(:info, "Category deleted.")
+  |> redirect(to: category_path(conn, :index))  end
 end
 ```
 
@@ -70,6 +69,8 @@ In the schedule, add this to delete category:
 
 ```
 def delete_category(category) do
-  Repo.delete(category)
+  id
+  |> get_category!()
+  |> Repo.delete()
 end
 ```
