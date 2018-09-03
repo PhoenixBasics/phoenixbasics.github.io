@@ -5,7 +5,7 @@ title: Deploy
 
 ### Configs
 
-1. Open up `config/prod.exs`, add a comma to `  cache_static_manifest: "priv/static/cache_manifest.json",`. Then add this below it:
+1. Open up `config/prod.exs`, add a comma to `cache_static_manifest: "priv/static/cache_manifest.json",`. Then add this below it:
 
 ```
 secret_key_base: Map.fetch!(System.get_env(), "SECRET_KEY_BASE")
