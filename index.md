@@ -27,3 +27,4 @@ We broke each section into branches so you can see the difference (this master b
 ### Resources:
 - [https://hexdocs.pm/phoenix/installation.html](https://hexdocs.pm/phoenix/installation.html)
 - [https://hexdocs.pm/phoenix/heroku.html](https://hexdocs.pm/phoenix/heroku.html)
+- [DEMO](https://polar-citadel-24095.herokuapp.com/schedule_slots)
