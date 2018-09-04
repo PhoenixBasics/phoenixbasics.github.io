@@ -5,6 +5,8 @@ title: Deploy
 
 ### Configs
 
+(Use `git checkout 9.deploy` to catch up with the class)
+
 1. Open up `config/prod.exs`, add a comma to `cache_static_manifest: "priv/static/cache_manifest.json",`. Then add this below it:
 
 ```
