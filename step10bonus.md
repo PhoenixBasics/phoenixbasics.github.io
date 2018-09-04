@@ -44,10 +44,12 @@ See the answer on [Github](https://github.com/PhoenixBasics/fawkes/compare/10.bo
 
 In this exercise we'll filter the talks by the day. Notice if you click on any of the date, it hits `schedule_slots` with the date param ([http://localhost:4000/schedule_slots?date=2018-09-07](http://localhost:4000/schedule_slots?date=2018-09-07)).
 
-1. Open `lib/fawkes_web/controller/slot_controller.ex`, edit the `index` function to pass the params date to `Schedule.list_schedule_slots`. Open up `lib/fawkes/schedule/schedule.ex`, change the `list_schedule_slots` function to take in a date. We want to parse the date, then get the beginning of the date and end of the date. Then filter to only return the slot within the given time frame.
+1. Open `lib/fawkes_web/controller/slot_controller.ex`, edit the `index` function to pass the params date to `Schedule.list_schedule_slots`. Open up `lib/fawkes/schedule/schedule.ex`, change the `list_schedule_slots` function to take in a date. Parse the date, get the beginning of the day and end of the day. Then filter to return the slot within the given time frame. Here is some code to help you with the parsing.
 
 ```
 parsed_date = Timex.parse!(date, "%Y-%m-%d", :strftime)
 beginning_of_day = Timex.beginning_of_day(parsed_date)
 end_of_day = Timex.end_of_day(parsed_date)
 ```
+
+See the answer on [Github](https://github.com/PhoenixBasics/fawkes/compare/10.bonus2...10.bonus3?expand=1)

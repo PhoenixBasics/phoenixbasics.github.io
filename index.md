@@ -25,5 +25,5 @@ At any point that you're lost, check out the final code here:
 We broke each section into branches so you can see the difference (this master branch is an empty commit from before we started our Phoenix project).
 
 ### Resources:
-- https://hexdocs.pm/phoenix/installation.html
-- https://hexdocs.pm/phoenix/heroku.html
+- [https://hexdocs.pm/phoenix/installation.html](https://hexdocs.pm/phoenix/installation.html)
+- [https://hexdocs.pm/phoenix/heroku.html](https://hexdocs.pm/phoenix/heroku.html)
