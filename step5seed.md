@@ -36,11 +36,17 @@ import Ecto.Query
 We're going to load all the talks through the slots. Go to the function `list_schedule_slots` (maybe line 126). We want to say load all the event and talks. For all the talks, list the slot, speakers, categories, audience, and location.
 
 ```
-Slot
-|> preload([:event, talks: [:slot, :speakers, :categories, :audience, :location]])
-|> order_by(asc: :start_time)
-|> Repo.all()
-|> Enum.group_by(&(Timex.beginning_of_day(&1.start_time)))
+def list_schedule_slots do
+  Slot
+  |> preload([:event, talks: [:slot, :speakers, :categories, :audience, :location]])
+  |> order_by(asc: :start_time)
+  |> Repo.all()
+  |> Enum.group_by(&get_day/1)
+end
+
+defp get_day(slot) do
+  Timex.beginning_of_day(slot.start_time)
+end
 ```
 
 Now, we need to add a shared view to help with formatting the layout. Create a filed called `lib/fawkes_web/views/shared_view.ex`. Add this code:
