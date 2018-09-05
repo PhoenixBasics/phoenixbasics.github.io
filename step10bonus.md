@@ -53,3 +53,7 @@ end_of_day = Timex.end_of_day(parsed_date)
 ```
 
 See the answer on [Github](https://github.com/PhoenixBasics/fawkes/compare/10.bonus2...10.bonus3?expand=1)
+
+
+### Resources
+[Guardian API Authentication](https://medium.com/@njwest/jwt-auth-with-an-elixir-on-phoenix-1-3-guardian-api-and-react-native-mobile-app-1bd00559ea51)
