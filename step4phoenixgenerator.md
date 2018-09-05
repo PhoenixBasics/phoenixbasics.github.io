@@ -54,7 +54,7 @@ Now let's add locations. Because we don't need the front end for this, we will o
 mix phx.gen.schema Schedule.Location locations slug:string:unique name:string
 ```
 
-Same for event. 
+Same for event.
 
 ```
 mix phx.gen.schema Schedule.Event events slug:string:unique name:string slot_id:references:schedule_slots
@@ -93,7 +93,7 @@ defmodule Fawkes.Repo.Migrations.EnableCitextExtension do
 end
 ```
 
-Now we're ready to generate the speaker. 
+Now we're ready to generate the speaker.
 
 ```
 mix phx.gen.html Schedule Speaker profiles talk_id:references:talks slug:string:unique image:string image_url:string first:string last:string company:string github:string twitter:string description:text
@@ -244,12 +244,6 @@ Open `mix.exs`, after line 33 in the `deps` block, add a comma, then timex_ecto
 
 ```
 {:timex_ecto, "~> 3.3"}
-```
-
-On line 23, add `:timex_ecto` to the extra_applications list as another application to run.
-
-```
-extra_applications: [:logger, :runtime_tools, :timex_ecto]
 ```
 
 Let's get the dependency by running:
