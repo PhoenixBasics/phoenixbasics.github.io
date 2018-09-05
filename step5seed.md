@@ -9,7 +9,7 @@ Now that we have our modules, let's connect them all together?
 Run this command to get the seed files:
 
 ```
-git merge seeds
+git merge origin/seeds
 ```
 
 Add this line to `priv/repo/seeds.exs` run the seed file:
